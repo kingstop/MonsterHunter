@@ -94,7 +94,7 @@ public class TSClickToMove : MonoBehaviour
 			Vector3 newPos = Vector3.MoveTowards(mTrans.position, mTarget, 10f * Time.deltaTime);
 			newPos.y = Terrain.activeTerrain.SampleHeight(newPos);
 
-            Vector3 dir = mTarget - mTrans.position;
+            //Vector3 dir = mTarget - mTrans.position;
             change_state(role_state.run);
             //Debug.Log( "dir [" + dir.ToString() + "]");
             change_dir(mTarget);
