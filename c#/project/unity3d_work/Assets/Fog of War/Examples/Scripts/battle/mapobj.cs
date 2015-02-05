@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+using System.Collections.Generic;
 
 public enum Arguments_type{
     pos_x = 0,
@@ -145,9 +147,14 @@ public class mapobj
         
     }
 
-    public virtual void obj_update_move()
+    public virtual void obj_update_move(int interval_time )
     {
         if (is_move_state() == false)
+        {
+            return;
+        }
+
+        if (is_need_move() == false)
         {
             return;
         }
@@ -162,15 +169,30 @@ public class mapobj
             move_speed = get_run_speed();
         }
 
-       
-        
+        int move_x = get_want_move_pos().X - get_pos().X;
+        int move_y = get_want_move_pos().Y - get_pos().Y;
+        int temp_distaance = move_x * move_x + move_y * move_y;
 
+        double want_move_distance = move_speed * interval_time;
 
+        double distance_move = System.Math.Sqrt(temp_distaance);
 
+        if (want_move_distance > distance_move)
+        {
+            want_move_distance = (int)distance_move;
+        }
+
+        double temp = want_move_distance / distance_move;
+        double temp_move_x = temp * move_x;
+        double temp_move_y = temp * move_y;
+        Map_Pos pos = get_pos();
+        pos.X = pos.X + (int)temp_move_x;
+        pos.Y = pos.Y + (int)temp_move_y;
+        set_map_pos(pos);
     }
-    public virtual void obj_update()
+    public virtual void obj_update(int interval_time)
     {
-
+        obj_update_move(interval_time);
     }
 
     public virtual void reset()
