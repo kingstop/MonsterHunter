@@ -18,6 +18,7 @@ public enum Arguments_type{
     begin_hp,
     walk_speed,
     run_speed,
+    faction,
     max
 }
 public enum obj_type
@@ -53,10 +54,11 @@ public class map_base_source{
     public Map_Pos _pos = new Map_Pos();
     public obj_type _type;
     public Vector3 _dir;
-    public int max_hp;
-    public int begin_hp;
-    public int walk_speed;
-    public int run_speed;
+    public int _max_hp;
+    public int _begin_hp;
+    public int _walk_speed;
+    public int _run_speed;
+    public int _Faction;
 
 }
 
@@ -197,7 +199,24 @@ public class mapobj
 
     public virtual void reset()
     {
+    //public Map_Pos _pos = new Map_Pos();
+    //public obj_type _type;
+    //public Vector3 _dir;
+    //public int max_hp;
+    //public int begin_hp;
+    //public int walk_speed;
+    //public int run_speed;
+    //public int Faction;
+          
+         
+        
         set_map_pos(_source._pos);
+        set_dir(_source._dir);
+        set_begin_hp(_source._begin_hp);
+        set_max_hp(_source._max_hp);
+       
+       
+
     }
 
     public virtual obj_type get_obj_type()
@@ -220,6 +239,15 @@ public class mapobj
         return get_argument(Arguments_type.max_hp);
     }
 
+    public virtual void set_max_hp(int max_hp)
+    {
+        set_argument(Arguments_type.max_hp, max_hp);
+    }
+
+    public virtual void set_begin_hp(int begin_hp)
+    {
+        set_argument(Arguments_type.begin_hp, begin_hp);
+    }
     public virtual void set_dir(Vector3 dir)
     {
         int dir_x_temp = (int)dir.x * 1000;
@@ -247,6 +275,15 @@ public class mapobj
         return Pos;
     }
 
+    public virtual void set_walk_speed(int walkspeed)
+    {
+        set_argument(Arguments_type.walk_speed, walkspeed);
+    }
+
+    public virtual void set_run_speed(int runspeed)
+    {
+        set_argument(Arguments_type.run_speed, runspeed);
+    }
     public virtual int get_walk_speed()
     {
         return get_argument(Arguments_type.walk_speed);

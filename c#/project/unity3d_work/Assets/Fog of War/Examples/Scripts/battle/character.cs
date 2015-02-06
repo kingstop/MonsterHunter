@@ -9,25 +9,22 @@ public class character_info : map_base_source
 
 
 
-public class character : mapobj {
+public class character : mapobj
+{
+
     public character()
     {
         set_obj_type(obj_type.character);
     }
 
-
-
-    protected virtual void move_to(Map_Pos pos)
+    public override void init(map_base_source map)
     {
-        if (get_pos() != pos)
-        {
-
-        }
+        base.init(map);        
     }
 
-
-
-
-    
+    public override void reset()
+    {
+        base.reset();
+    }
 
 }
