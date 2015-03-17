@@ -76,6 +76,8 @@ build/
 .builds
 *.pidb
 *.log
+UnityTempFile-*
+*.unity3d_work.*
 *.scc
 
 # Visual C++ cache files
@@ -85,6 +87,7 @@ ipch/
 *.opensdf
 *.sdf
 *.cachefile
+*.filters
 
 # Visual Studio profiler
 *.psess
