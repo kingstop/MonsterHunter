@@ -5,7 +5,7 @@
 #include <XnOpenNI.h>
 #include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
-//#include "SceneDrawer.h"
+#include "SceneDrawer.h"
 #include <XnPropNames.h>
 
 //---------------------------------------------------------------------------
@@ -208,7 +208,7 @@ void glutDisplay (void)
 	// Process the data
 	g_DepthGenerator.GetMetaData(depthMD);
 	g_UserGenerator.GetUserPixels(0, sceneMD);
-	//DrawDepthMap(depthMD, sceneMD);
+	DrawDepthMap(depthMD, sceneMD);
 
 #ifndef USE_GLES
 	glutSwapBuffers();
@@ -284,7 +284,7 @@ void glInit (int * pargc, char ** argv)
 }
 #endif // USE_GLES
 
-#define SAMPLE_XML_PATH "../../../Data/SamplesConfig.xml"
+#define SAMPLE_XML_PATH "SamplesConfig.xml"
 
 #define CHECK_RC(nRetVal, what)										\
 	if (nRetVal != XN_STATUS_OK)									\
@@ -295,7 +295,6 @@ void glInit (int * pargc, char ** argv)
 
 int _tmain(int argc, char** argv)
 {
-
 	XnStatus nRetVal = XN_STATUS_OK;
 
 	if (argc > 1)
@@ -394,11 +393,11 @@ int _tmain(int argc, char** argv)
 
 	g_UserGenerator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
 
-	//nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationInProgress(MyCalibrationInProgress, NULL, hCalibrationInProgress);
-	//CHECK_RC(nRetVal, "Register to calibration in progress");
+	nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationInProgress(MyCalibrationInProgress, NULL, hCalibrationInProgress);
+	CHECK_RC(nRetVal, "Register to calibration in progress");
 
-	//nRetVal = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseInProgress(MyPoseInProgress, NULL, hPoseInProgress);
-	//CHECK_RC(nRetVal, "Register to pose in progress");
+	nRetVal = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseInProgress(MyPoseInProgress, NULL, hPoseInProgress);
+	CHECK_RC(nRetVal, "Register to pose in progress");
 
 	nRetVal = g_Context.StartGeneratingAll();
 	CHECK_RC(nRetVal, "StartGenerating");
