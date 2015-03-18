@@ -16,6 +16,7 @@ void action_storage::load_from_xml(const char* xml_file)
 {
 	TiXmlDocument doc(xml_file);
 	doc.LoadFile();
+	doc.FirstChild()
 
 
 }
