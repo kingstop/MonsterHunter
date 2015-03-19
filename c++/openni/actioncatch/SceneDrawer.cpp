@@ -24,6 +24,7 @@
 //---------------------------------------------------------------------------
 #include <stdafx.h>
 #include "SceneDrawer.h"
+#include "action_storage.h"
 
 #ifndef USE_GLES
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
@@ -43,6 +44,7 @@ extern XnBool g_bDrawPixels;
 extern XnBool g_bDrawSkeleton;
 extern XnBool g_bPrintID;
 extern XnBool g_bPrintState;
+extern action_storage* g_action_storage;
 
 #include <map>
 std::map<XnUInt32, std::pair<XnCalibrationStatus, XnPoseDetectionStatus> > m_Errors;
@@ -351,6 +353,9 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 	g_UserGenerator.GetUsers(aUsers, nUsers);
 	for (int i = 0; i < nUsers; ++i)
 	{
+
+		g_action_storage->frame_check(aUsers[i]);
+		
 #ifndef USE_GLES
 		if (g_bPrintID)
 		{
