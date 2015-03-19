@@ -9,7 +9,8 @@
 
 #include <stdio.h>
 #include <tchar.h>
-
-
+#include "action_storage.h"
+extern action_storage* g_action_storage;
+//extern action_storage* g_action_storage;
 
 // TODO: reference additional headers your program requires here
