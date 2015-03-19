@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "action_storage.h"
 #include <XnOpenNI.h>
 #include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
@@ -297,8 +296,7 @@ void glInit (int * pargc, char ** argv)
 int _tmain(int argc, char** argv)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
-	
-	g_action_storage->load_from_xml("demo.xml");
+
 	if (argc > 1)
 	{
 		nRetVal = g_Context.Init();
