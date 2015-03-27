@@ -70,6 +70,7 @@ BOOL CactioncatchtoolApp::InitInstance()
 
 	CactioncatchtoolDlg dlg;
 	m_pMainWnd = &dlg;
+	g_dlg = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{

@@ -55,4 +55,8 @@
 #endif
 #endif
 
+#include "frameCatch.h"
 
+
+
+extern frameCatch g_frameCatch;

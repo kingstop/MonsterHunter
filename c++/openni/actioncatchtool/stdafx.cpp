@@ -6,3 +6,5 @@
 #include "stdafx.h"
 
 
+
+frameCatch g_frameCatch;
