@@ -57,6 +57,37 @@
 
 #include "frameCatch.h"
 
+#ifndef USE_GLES
+#if (XN_PLATFORM == XN_PLATFORM_MACOSX)
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+#else
+#include "opengles.h"
+#endif
+
+#include <XnOpenNI.h>
+#include <XnCodecIDs.h>
+#include <XnCppWrapper.h>
+#include "SceneDrawer.h"
+#include <XnPropNames.h>
 
 
+extern xn::UserGenerator g_UserGenerator;
+extern xn::DepthGenerator g_DepthGenerator;
+
+extern XnBool g_bDrawBackground;
+extern XnBool g_bDrawPixels;
+extern XnBool g_bDrawSkeleton;
+extern XnBool g_bPrintID;
+extern XnBool g_bPrintState;
 extern frameCatch g_frameCatch;
+extern xn::Context g_Context;
+extern xn::ScriptNode g_scriptNode;
+extern xn::DepthGenerator g_DepthGenerator;
+extern xn::UserGenerator g_UserGenerator;
+extern xn::Player g_Player;
+
+extern XnBool g_bNeedPose;
+extern XnChar g_strPose[20];

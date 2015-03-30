@@ -7,38 +7,321 @@
 #include "actioncatchtoolDlg.h"
 #include "afxdialogex.h"
 #include "GL/glut.h"
+#include "DlgViewCatch.h"
+#include "DlgViewEdit.h"
 //#include "GL/glaux.h"    
 #include<windows.h>
 #include<strsafe.h>//win2003SDK必须安装　要不无此头文件。此文件是为了实现StringCchPrintf，StringCchLength。
 #define MAX_THREADS 3
 #define BUF_SIZE 255
 
-DWORD WINAPI ThreadProc(LPVOID lpParam)
-{
-	HANDLE hStdout;
-	PMYDATA pData;
-	TCHAR msgBuf[BUF_SIZE];
-	size_t cchStringSize;
-	DWORD dwChars;
-	hStdout=GetStdHandle(STD_OUTPUT_HANDLE);
-	if(hStdout==INVALID_HANDLE_VALUE)
-		return 1;
-	//Casttheparametertothecorrectdatatype.
-	pData=(PMYDATA)lpParam;
-	//Printtheparametervaluesusingthread-safefunctions.
-	//StringCchPrintf(msgBuf,BUF_SIZE,TEXT("Parameters=%d,%d\n"),
-	//	pData->val1,pData->val2);
-	//StringCchLength(msgBuf,BUF_SIZE,&cchStringSize);
-	//WriteConsole(hStdout,msgBuf,cchStringSize,&dwChars,NULL);
-	//Freethememoryallocatedbythecallerforthethread
-	//datastructure.
-	HeapFree(GetProcessHeap(),0,pData);
-	return 0;
-}
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////////
+
+#define GL_WIN_SIZE_X 720
+#define GL_WIN_SIZE_Y 480
+
+XnBool g_bPause = false;
+XnBool g_bRecord = false;
+
+XnBool g_bQuit = false;
+
+//---------------------------------------------------------------------------
+// Code
+//---------------------------------------------------------------------------
+
+void Initial(void)
+{
+	GLfloat mat_ambient[] = {0.2f,0.2f,0.2f,1.0f};
+	GLfloat mat_diffuse[] = {0.8f,0.8f,0.8f,1.0f};
+	GLfloat mat_specular[] = {1.0f,1.0f,1.0f,1.0f};
+	GLfloat mat_shininess[] = {50.0f};
+
+
+	GLfloat light0_diffuse[] = {0.0f,0.0f,1.0f,1.0f};
+	GLfloat light0_position[] = {1.0f,1.0f,1.0f,0.0f};
+	GLfloat light1_ambient[] = {0.2f,0.2f,0.2f,1.0f};
+	GLfloat light1_diffuse[] = {1.0f,0.0f,0.0f,1.0f};
+	GLfloat light1_specular[] = {1.0f,0.6f,0.6f,1.0f};
+	GLfloat light1_position[] = {-3.0f,-3.0f,3.0f,1.0f};
+
+	GLfloat spot_direction[] = {1.0f,1.0f,-1.0f};
+
+	glMaterialfv(GL_FRONT,GL_AMBIENT,mat_ambient);
+	glMaterialfv(GL_FRONT,GL_DIFFUSE,mat_diffuse);
+	glMaterialfv(GL_FRONT,GL_SPECULAR,mat_specular);
+	glMaterialfv(GL_FRONT,GL_SHININESS,mat_shininess);
+
+
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,light0_diffuse);
+	glLightfv(GL_LIGHT0,GL_POSITION,light0_position);
+
+	glLightfv(GL_LIGHT1,GL_AMBIENT,light1_ambient);
+	glLightfv(GL_LIGHT1,GL_SPECULAR,light1_specular);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,light1_diffuse);
+	glLightfv(GL_LIGHT1,GL_POSITION,light0_position);
+
+
+	glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,30.0);
+	glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,spot_direction);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+
+
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(1.0f,1.0f,1.0f,1.0f);
+
+}
+
+void CleanupExit()
+{
+	g_scriptNode.Release();
+	g_DepthGenerator.Release();
+	g_UserGenerator.Release();
+	g_Player.Release();
+	g_Context.Release();
+
+	exit (1);
+}
+
+// Callback: New user was detected
+void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
+{
+	XnUInt32 epochTime = 0;
+	xnOSGetEpochTime(&epochTime);
+	printf("%d New User %d\n", epochTime, nId);
+	// New user found
+	if (g_bNeedPose)
+	{
+		g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(g_strPose, nId);
+	}
+	else
+	{
+		g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+	}
+}
+// Callback: An existing user was lost
+void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
+{
+	XnUInt32 epochTime = 0;
+	xnOSGetEpochTime(&epochTime);
+	printf("%d Lost user %d\n", epochTime, nId);	
+}
+// Callback: Detected a pose
+void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capability, const XnChar* strPose, XnUserID nId, void* pCookie)
+{
+	XnUInt32 epochTime = 0;
+	xnOSGetEpochTime(&epochTime);
+	printf("%d Pose %s detected for user %d\n", epochTime, strPose, nId);
+	g_UserGenerator.GetPoseDetectionCap().StopPoseDetection(nId);
+	g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+}
+// Callback: Started calibration
+void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie)
+{
+	XnUInt32 epochTime = 0;
+	xnOSGetEpochTime(&epochTime);
+	printf("%d Calibration started for user %d\n", epochTime, nId);
+}
+// Callback: Finished calibration
+void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability& capability, XnUserID nId, XnCalibrationStatus eStatus, void* pCookie)
+{
+	XnUInt32 epochTime = 0;
+	xnOSGetEpochTime(&epochTime);
+	if (eStatus == XN_CALIBRATION_STATUS_OK)
+	{
+		// Calibration succeeded
+		printf("%d Calibration complete, start tracking user %d\n", epochTime, nId);		
+		g_UserGenerator.GetSkeletonCap().StartTracking(nId);
+	}
+	else
+	{
+		// Calibration failed
+		printf("%d Calibration failed for user %d\n", epochTime, nId);
+		if(eStatus==XN_CALIBRATION_STATUS_MANUAL_ABORT)
+		{
+			printf("Manual abort occured, stop attempting to calibrate!");
+			return;
+		}
+		if (g_bNeedPose)
+		{
+			g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(g_strPose, nId);
+		}
+		else
+		{
+			g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+		}
+	}
+}
+
+#define XN_CALIBRATION_FILE_NAME "UserCalibration.bin"
+
+// Save calibration to file
+void SaveCalibration()
+{
+	XnUserID aUserIDs[20] = {0};
+	XnUInt16 nUsers = 20;
+	g_UserGenerator.GetUsers(aUserIDs, nUsers);
+	for (int i = 0; i < nUsers; ++i)
+	{
+		// Find a user who is already calibrated
+		if (g_UserGenerator.GetSkeletonCap().IsCalibrated(aUserIDs[i]))
+		{
+			// Save user's calibration to file
+			g_UserGenerator.GetSkeletonCap().SaveCalibrationDataToFile(aUserIDs[i], XN_CALIBRATION_FILE_NAME);
+			break;
+		}
+	}
+}
+// Load calibration from file
+void LoadCalibration()
+{
+	XnUserID aUserIDs[20] = {0};
+	XnUInt16 nUsers = 20;
+	g_UserGenerator.GetUsers(aUserIDs, nUsers);
+	for (int i = 0; i < nUsers; ++i)
+	{
+		// Find a user who isn't calibrated or currently in pose
+		if (g_UserGenerator.GetSkeletonCap().IsCalibrated(aUserIDs[i])) continue;
+		if (g_UserGenerator.GetSkeletonCap().IsCalibrating(aUserIDs[i])) continue;
+
+		// Load user's calibration from file
+		XnStatus rc = g_UserGenerator.GetSkeletonCap().LoadCalibrationDataFromFile(aUserIDs[i], XN_CALIBRATION_FILE_NAME);
+		if (rc == XN_STATUS_OK)
+		{
+			// Make sure state is coherent
+			g_UserGenerator.GetPoseDetectionCap().StopPoseDetection(aUserIDs[i]);
+			g_UserGenerator.GetSkeletonCap().StartTracking(aUserIDs[i]);
+		}
+		break;
+	}
+}
+
+// this function is called each frame
+void glutDisplay (void)
+{
+
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Setup the OpenGL viewpoint
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	xn::SceneMetaData sceneMD;
+	xn::DepthMetaData depthMD;
+	g_DepthGenerator.GetMetaData(depthMD);
+#ifndef USE_GLES
+	glOrtho(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
+#else
+	glOrthof(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
+#endif
+
+	glDisable(GL_TEXTURE_2D);
+
+	if (!g_bPause)
+	{
+		// Read next available data
+		g_Context.WaitOneUpdateAll(g_UserGenerator);
+	}
+
+	// Process the data
+	g_DepthGenerator.GetMetaData(depthMD);
+	g_UserGenerator.GetUserPixels(0, sceneMD);
+	DrawDepthMap(depthMD, sceneMD);
+
+#ifndef USE_GLES
+	;//glutSwapBuffers();
+#endif
+}
+
+#ifndef USE_GLES
+void glutIdle (void)
+{
+	if (g_bQuit) {
+		CleanupExit();
+	}
+
+	// Display the frame
+	glutPostRedisplay();
+}
+
+void glutKeyboard (unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case 27:
+		CleanupExit();
+	case 'b':
+		// Draw background?
+		g_bDrawBackground = !g_bDrawBackground;
+		break;
+	case 'x':
+		// Draw pixels at all?
+		g_bDrawPixels = !g_bDrawPixels;
+		break;
+	case 's':
+		// Draw Skeleton?
+		g_bDrawSkeleton = !g_bDrawSkeleton;
+		break;
+	case 'i':
+		// Print label?
+		g_bPrintID = !g_bPrintID;
+		break;
+	case 'l':
+		// Print ID & state as label, or only ID?
+		g_bPrintState = !g_bPrintState;
+		break;
+	case'p':
+		g_bPause = !g_bPause;
+		break;
+	case 'S':
+		SaveCalibration();
+		break;
+	case 'L':
+		LoadCalibration();
+		break;
+	}
+}
+void glInit (int * pargc, char ** argv)
+{
+	glutInit(pargc, argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitWindowSize(GL_WIN_SIZE_X, GL_WIN_SIZE_Y);
+	glutCreateWindow ("User Tracker Viewer");
+	//glutFullScreen();
+	glutSetCursor(GLUT_CURSOR_NONE);
+
+	glutKeyboardFunc(glutKeyboard);
+	glutDisplayFunc(glutDisplay);
+	glutIdleFunc(glutIdle);
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+}
+#endif // USE_GLES
+
+#define SAMPLE_XML_PATH "SamplesConfig.xml"
+
+#define CHECK_RC(nRetVal, what)										\
+	if (nRetVal != XN_STATUS_OK)									\
+{																\
+	printf("%s failed: %s\n", what, xnGetStatusString(nRetVal));\
+	return nRetVal;												\
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
 
 CactioncatchtoolDlg* g_dlg = NULL;
 // CAboutDlg dialog used for App About
@@ -82,6 +365,8 @@ CactioncatchtoolDlg::CactioncatchtoolDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	_wnd_main_render = NULL;
+	_page_view_edit = NULL;
+	_page_view_catch = NULL;
 
 }
 
@@ -89,73 +374,22 @@ void CactioncatchtoolDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	//DDX_Control(pDX, IDC_ANIMATION_MAIN, _animate_main);
-	DDX_Control(pDX, IDC_LIST_CATCH_FRAMES, _catch_frames_list);
-}
-/*
-
-HDC sel_hrenderDC;                                                            // DC
-HGLRC sel_hrenderRC;                                                        // RC
-int sel_PixelFormat;
-PMYDATA pData_sel;
-DWORD dwThreadId_sel;
-HANDLE hThread_sel;
-
-
-HDC edit_hrenderDC;                                                            // DC
-HGLRC edit_hrenderRC;                                                        // RC
-int edit_PixelFormat;
-DWORD dwThreadId_edit;
-HANDLE hThread_edit;
-
-*/
-
-void CactioncatchtoolDlg::createEditView()
-{
-	pData_sel=(PMYDATA)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,
-		sizeof(MYDATA));
-	if(pData_sel==NULL)
-		ExitProcess(2);
-	//Generateuniquedataforeachthread.
-	pData_sel->val1=i;
-	pData_sel->val2=i+100;
-	hThread[i]=CreateThread(
-		NULL,//defaultsecurityattributes
-		0,//usedefaultstacksize
-		ThreadProc,//threadfunction
-		pData,//argumenttothreadfunction
-		0,//usedefaultcreationflags
-		&dwThreadId[i]);//returnsthethreadidentifier
+	//DDX_Control(pDX, IDC_LIST_CATCH_FRAMES, _catch_frames_list);
+	DDX_Control(pDX, IDC_TAB_MAIN, _tab_status);
 }
 
-void CactioncatchtoolDlg::createSelView()
-{
-	pData=(PMYDATA)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,
-		sizeof(MYDATA));
-	if(pData==NULL)
-		ExitProcess(2);
-	//Generateuniquedataforeachthread.
-	pData->val1=i;
-	pData->val2=i+100;
-	hThread[i]=CreateThread(
-		NULL,//defaultsecurityattributes
-		0,//usedefaultstacksize
-		ThreadProc,//threadfunction
-		pData,//argumenttothreadfunction
-		0,//usedefaultcreationflags
-		&dwThreadId[i]);//returnsthethreadidentifier
-}
+
 
 BEGIN_MESSAGE_MAP(CactioncatchtoolDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_TIMER()
-	ON_BN_CLICKED(IDC_BTNCATCH_FRAME, &CactioncatchtoolDlg::OnBnClickedBtncatchFrame)
-	ON_BN_CLICKED(IDC_BTNDELETE_FRAME, &CactioncatchtoolDlg::OnBnClickedBtndeleteFrame)
-	ON_LBN_SELCHANGE(IDC_LIST_CATCH_FRAMES, &CactioncatchtoolDlg::OnLbnSelchangeListCatchFrames)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_MAIN, &CactioncatchtoolDlg::OnTcnSelchangeTabMain)
+	ON_WM_MOVE()
 END_MESSAGE_MAP()
 
-BOOL CactioncatchtoolDlg::CreateViewGLContext(HDC hDC, HGLRC hGLRC) {
+BOOL CactioncatchtoolDlg::CreateViewGLContext(HDC hDC, HGLRC& hGLRC) {
 	hGLRC = wglCreateContext(hDC);
 	if(hGLRC == NULL) {
 		return FALSE;
@@ -213,7 +447,7 @@ BOOL CactioncatchtoolDlg::SetWindowPixelFormat(HDC hDC) { // CCOpenGLDlg改为你自
 BOOL CactioncatchtoolDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
+	//_tab_status.InsertItem();
 	// Add "About..." menu item to system menu.
 
 	// IDM_ABOUTBOX must be in the system command range.
@@ -239,42 +473,6 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	_wnd_main_render = GetDlgItem(IDC_RENDER_MAIN);
-
-	PMYDATA pData;
-	DWORD dwThreadId[MAX_THREADS];
-	HANDLE hThread[MAX_THREADS];
-	int i;
-	//CreateMAX_THREADSworkerthreads.
-	for(i=0;i<MAX_THREADS;i++)
-	{
-		//Allocatememoryforthreaddata.
-		pData=(PMYDATA)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,
-			sizeof(MYDATA));
-		if(pData==NULL)
-			ExitProcess(2);
-		//Generateuniquedataforeachthread.
-		pData->val1=i;
-		pData->val2=i+100;
-		hThread[i]=CreateThread(
-			NULL,//defaultsecurityattributes
-			0,//usedefaultstacksize
-			ThreadProc,//threadfunction
-			pData,//argumenttothreadfunction
-			0,//usedefaultcreationflags
-			&dwThreadId[i]);//returnsthethreadidentifier
-		//Checkthereturnvalueforsuccess.
-		if(hThread[i]==NULL)
-		{
-			ExitProcess(i);
-		}
-	}
-	//Waituntilallthreadshaveterminated.
-	WaitForMultipleObjects(MAX_THREADS,hThread,TRUE,INFINITE);
-	//Closeallthreadhandlesuponcompletion.
-	for(i=0;i<MAX_THREADS;i++)
-	{
-		CloseHandle(hThread[i]);
-	}
 
 
 	hrenderDC = ::GetDC(_wnd_main_render->m_hWnd);
@@ -305,7 +503,18 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	//{
 	//	return 0;
 	//}
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
+
+	//glutFullScreen();
+
+
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 	// openGL的初始化设置
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glShadeModel(GL_SMOOTH);
@@ -313,10 +522,152 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	glMatrixMode(GL_PROJECTION);
 	gluPerspective(45, 1, 0.1, 100.0);
 	glMatrixMode(GL_MODELVIEW);
+
+	
+	//Initial();
 	glLoadIdentity();
+
+	XnStatus nRetVal = XN_STATUS_OK;
+	xn::EnumerationErrors errors;
+	nRetVal = g_Context.InitFromXmlFile(SAMPLE_XML_PATH, g_scriptNode, &errors);
+	if (nRetVal == XN_STATUS_NO_NODE_PRESENT)
+	{
+		XnChar strError[1024];
+		errors.ToString(strError, 1024);
+		printf("%s\n", strError);
+		return (nRetVal);
+	}
+	else if (nRetVal != XN_STATUS_OK)
+	{
+		printf("Open failed: %s\n", xnGetStatusString(nRetVal));
+		return (nRetVal);
+	}
+
+	nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_DEPTH, g_DepthGenerator);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		printf("No depth generator found. Using a default one...");
+		xn::MockDepthGenerator mockDepth;
+		nRetVal = mockDepth.Create(g_Context);
+		CHECK_RC(nRetVal, "Create mock depth");
+
+		// set some defaults
+		XnMapOutputMode defaultMode;
+		defaultMode.nXRes = 320;
+		defaultMode.nYRes = 240;
+		defaultMode.nFPS = 30;
+		nRetVal = mockDepth.SetMapOutputMode(defaultMode);
+		CHECK_RC(nRetVal, "set default mode");
+
+		// set FOV
+		XnFieldOfView fov;
+		fov.fHFOV = 1.0225999419141749;
+		fov.fVFOV = 0.79661567681716894;
+		nRetVal = mockDepth.SetGeneralProperty(XN_PROP_FIELD_OF_VIEW, sizeof(fov), &fov);
+		CHECK_RC(nRetVal, "set FOV");
+
+		XnUInt32 nDataSize = defaultMode.nXRes * defaultMode.nYRes * sizeof(XnDepthPixel);
+		XnDepthPixel* pData = (XnDepthPixel*)xnOSCallocAligned(nDataSize, 1, XN_DEFAULT_MEM_ALIGN);
+
+		nRetVal = mockDepth.SetData(1, 0, nDataSize, pData);
+		CHECK_RC(nRetVal, "set empty depth map");
+
+		g_DepthGenerator = mockDepth;
+	}
+
+	nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_USER, g_UserGenerator);
+	if (nRetVal != XN_STATUS_OK)
+	{
+		nRetVal = g_UserGenerator.Create(g_Context);
+		CHECK_RC(nRetVal, "Find user generator");
+	}
+
+	XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected, hCalibrationInProgress, hPoseInProgress;
+	if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
+	{
+		printf("Supplied user generator doesn't support skeleton\n");
+		return 1;
+	}
+	nRetVal = g_UserGenerator.RegisterUserCallbacks(User_NewUser, User_LostUser, NULL, hUserCallbacks);
+	CHECK_RC(nRetVal, "Register to user callbacks");
+	nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationStart(UserCalibration_CalibrationStart, NULL, hCalibrationStart);
+	CHECK_RC(nRetVal, "Register to calibration start");
+	nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationComplete(UserCalibration_CalibrationComplete, NULL, hCalibrationComplete);
+	CHECK_RC(nRetVal, "Register to calibration complete");
+
+	if (g_UserGenerator.GetSkeletonCap().NeedPoseForCalibration())
+	{
+		g_bNeedPose = TRUE;
+		if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION))
+		{
+			printf("Pose required, but not supported\n");
+			return 1;
+		}
+		nRetVal = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseDetected(UserPose_PoseDetected, NULL, hPoseDetected);
+		CHECK_RC(nRetVal, "Register to Pose Detected");
+		g_UserGenerator.GetSkeletonCap().GetCalibrationPose(g_strPose);
+	}
+
+	g_UserGenerator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+
+	nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationInProgress(MyCalibrationInProgress, NULL, hCalibrationInProgress);
+	CHECK_RC(nRetVal, "Register to calibration in progress");
+
+	nRetVal = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseInProgress(MyPoseInProgress, NULL, hPoseInProgress);
+	CHECK_RC(nRetVal, "Register to pose in progress");
+
+	nRetVal = g_Context.StartGeneratingAll();
+	CHECK_RC(nRetVal, "StartGenerating");
+
+
 	// 设置计时器,10ms刷新一次
 	SetTimer(1, 10, 0);
 	// TODO: Add extra initialization here
+
+
+	_tab_status.InsertItem(0 ,(LPCTSTR)"骨骼捕捉");//InsertItem(0," 呵呵，茂叶工作室 ");
+	_tab_status.InsertItem(1 ,(LPCTSTR)"骨骼编辑");
+	_page_view_catch = new DlgViewCatch(this);
+	_page_view_catch->Create(IDD_DIALOG_TAB_Catch, this);
+
+	_page_view_edit = new DlgViewEdit(this);
+	_page_view_edit->Create(IDD_DIALOG_TAB_Edit, this);
+	CRect rect;
+	_tab_status.GetClientRect(&rect);
+	CRect temp_rect;
+	_tab_status.GetWindowRect(&temp_rect);
+	CRect temp_rect_main;
+	this->GetClientRect(temp_rect_main);
+	temp_rect.top = temp_rect.top + 20;
+	temp_rect.left = temp_rect.left + 2;
+	temp_rect.right = temp_rect.right - 4;
+	temp_rect.bottom = temp_rect.bottom - 4;
+
+
+
+	_page_view_catch->MoveWindow(&temp_rect);
+
+	_page_view_edit->MoveWindow(&temp_rect);
+	_page_view_catch->ShowWindow(TRUE);
+
+	//_tab_status.InsertItem(1,(LPCTSTR)" 嘻嘻 ");
+	//_tab_status.InsertItem(2,(LPCTSTR)" 哈哈，www.maoyeah.com ");
+	////建立属性页各页
+	//page0.Create(IDD_DIALOG0,GetDlgItem(IDC_TAB1));
+	//page1.Create(IDD_DIALOG1,GetDlgItem(IDC_TAB1));
+	//page2.Create(IDD_DIALOG2,GetDlgItem(IDC_TAB1));
+	////设置页面的位置在m_tab控件范围内
+	//CRect rect;
+	//_tab_status.GetClientRect(&rect);
+	//rect.top+=20;
+	//rect.bottom-=5;
+	//rect.left+=5;
+	//rect.right-=5;
+	//page0.MoveWindow(&rect);
+	//page1.MoveWindow(&rect);
+	//page2.MoveWindow(&rect);
+	//page1.ShowWindow(TRUE);
+	//m_tab.SetCurSel(1);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -384,17 +735,72 @@ void CactioncatchtoolDlg::createThreadEdit()
 }
 
 void CactioncatchtoolDlg::RenderScene() {
+	glutDisplay();
+	SwapBuffers(hrenderDC);
+	//wglMakeCurrent(hrenderDC,hrenderRC );
 
-	//wglMakeCurrent(hrenderDC, hrenderRC);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(1.0, 1.0, 1.0);
-	glLoadIdentity();
-	glTranslatef(0.0, 0.0, -5.0);
-	glBegin(GL_TRIANGLES);
-	glVertex3f(0.0, 1.0, 0.0);
-	glVertex3f(-1.0, -1.0, 0.0);
-	glVertex3f(1.0, -1.0, 0.0);
-	glEnd();
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//glColor3f(1.0, 1.0, 1.0);
+	//glLoadIdentity();
+	//glTranslatef(0.0, 0.0, -5.0);
+	//glBegin(GL_LINES);
+	//glVertex3i(0.0, 1.0, 0.0);
+	//glVertex3i(-1.0, -1.0, 0.0);
+	//glVertex3i(-1.0, -1.0, 0.0);
+	//glVertex3i(1.0, -1.0, 0.0);
+	//glVertex3i(1.0, -1.0, 0.0);
+	//glVertex3i(0.0, 1.0, 0.0);
+
+	//glVertex3i(pt[1].X, pt[1].Y, 0)
+	//////////////////////////////////////////////////////////////////////////
+	//glPushMatrix();
+	//glTranslated(-3.0f,-3.0f,3.0f);
+	//glPopMatrix();
+	//glutSolidSphere(2.0f,50,50);
+
+	//////////////////////////////////////////////////////////////////////////
+
+//
+//	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//	// Setup the OpenGL viewpoint
+//	glMatrixMode(GL_PROJECTION);
+//	glPushMatrix();
+//	glLoadIdentity();
+//
+//	xn::SceneMetaData sceneMD;
+//	xn::DepthMetaData depthMD;
+//	g_DepthGenerator.GetMetaData(depthMD);
+//#ifndef USE_GLES
+//	glOrtho(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
+//#else
+//	glOrthof(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
+//#endif
+//
+//	glDisable(GL_TEXTURE_2D);
+//
+//	if (!g_bPause)
+//	{
+//		// Read next available data
+//		g_Context.WaitOneUpdateAll(g_UserGenerator);
+//	}
+//
+//	// Process the data
+//	g_DepthGenerator.GetMetaData(depthMD);
+//	g_UserGenerator.GetUserPixels(0, sceneMD);
+//	DrawDepthMap(depthMD, sceneMD);
+	//glEnd();
+
+
+	//glBegin(GL_LINES);
+	//glVertex3i(0.0, 1.0, 0.0);
+	//glVertex3i(-1.0, -1.0, 0.0);
+	//glVertex3i(-1.0, -1.0, 0.0);
+	//glVertex3i(1.0, -1.0, 0.0);
+	//glVertex3i(1.0, -1.0, 0.0);
+	//glVertex3i(0.0, 1.0, 0.0);
+	//glEnd();
+
 	SwapBuffers(hrenderDC);    // 使用glFlush()没有显示？
 }
 
@@ -455,8 +861,48 @@ void CactioncatchtoolDlg::OnLbnSelchangeListCatchFrames()
 {
 
 
-	CString select_string;
-	_catch_frames_list.GetText(_catch_frames_list.GetCurSel(), select_string);
+	//CString select_string;
+	//_catch_frames_list.GetText(_catch_frames_list.GetCurSel(), select_string);
 	
 	// TODO: Add your control notification handler code here
+}
+
+
+void CactioncatchtoolDlg::OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	int CurSel;
+	CurSel=_tab_status.GetCurSel();
+	switch(CurSel)
+	{
+	case 0:
+		_page_view_catch->ShowWindow(TRUE);
+		_page_view_edit->ShowWindow(FALSE);
+		break;
+	case 1:
+		_page_view_catch->ShowWindow(FALSE);
+		_page_view_edit->ShowWindow(TRUE);
+		break;
+	}
+}
+
+
+void CactioncatchtoolDlg::OnMove(int x, int y)
+{
+	CDialogEx::OnMove(x, y);
+	if (_page_view_catch&& _page_view_edit)
+	{
+		CRect temp_rect;
+		_tab_status.GetWindowRect(&temp_rect);	
+		temp_rect.top = temp_rect.top + 20;
+		temp_rect.left = temp_rect.left + 2;
+		temp_rect.right = temp_rect.right - 4;
+		temp_rect.bottom = temp_rect.bottom - 4;
+		_page_view_catch->MoveWindow(&temp_rect);
+		_page_view_edit->MoveWindow(&temp_rect);
+	}
+
+	// TODO: Add your message handler code here
 }

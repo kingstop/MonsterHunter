@@ -1,5 +1,8 @@
 #include "StdAfx.h"
 #include "frameCatch.h"
+#include "resource.h"
+#include "actioncatchtoolDlg.h"
+#include "DlgViewCatch.h"
 
 
 frameCatch::frameCatch(void)
@@ -31,7 +34,23 @@ void frameCatch::add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX])
 	}
 	else{
 		_frame_data[temp_frame->frame_name] = temp_frame;
+		on_frame_added(temp_frame->frame_name.c_str());
 	}
 	
 	
+}
+
+
+
+void frameCatch::on_frame_added(const char* frame_named)
+{
+	CString str_temp = frame_named;
+
+	g_dlg->_page_view_catch->_view_catch.AddString(str_temp);
+}
+
+void frameCatch::on_frame_deleted(const char* frame_named)
+{
+
+
 }

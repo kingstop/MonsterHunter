@@ -6,6 +6,8 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 class CactioncatchtoolDlg;
+class DlgViewEdit;
+class DlgViewCatch;
 typedef struct _MyData{
 	int val1;
 	int val2;
@@ -40,14 +42,14 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 
 	BOOL SetWindowPixelFormat(HDC hDC);
-	BOOL CreateViewGLContext(HDC hDC, HGLRC hGLRC);
+	BOOL CreateViewGLContext(HDC hDC, HGLRC& hGLRC);
 	void RenderScene();
 
 
 	void createThreadSel();
 	void createThreadEdit();
-	//void RenderSelFrameScene();
-	//void RenderEditFrameScene();
+	void RenderSelFrameScene();
+	void RenderEditFrameScene();
 
 
 	DECLARE_MESSAGE_MAP()
@@ -59,19 +61,6 @@ public:
 	HGLRC hrenderRC;                                                        // RC
 	int PixelFormat;
 
-	HDC sel_hrenderDC;                                                            // DC
-	HGLRC sel_hrenderRC;                                                        // RC
-	int sel_PixelFormat;
-	PMYDATA pData_sel;
-	DWORD dwThreadId_sel;
-	HANDLE hThread_sel;
-
-
-	HDC edit_hrenderDC;                                                            // DC
-	HGLRC edit_hrenderRC;                                                        // RC
-	int edit_PixelFormat;
-	DWORD dwThreadId_edit;
-	HANDLE hThread_edit;
 
 
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -79,7 +68,13 @@ public:
 	afx_msg void OnBnClickedBtncatchFrame();
 	afx_msg void OnBnClickedBtndeleteFrame();
 	afx_msg void OnLbnSelchangeListCatchFrames();
-protected:
-	CListBox _catch_frames_list;
+public:
+
+	CTabCtrl _tab_status;
+	DlgViewEdit* _page_view_edit;
+	DlgViewCatch* _page_view_catch;
+public:
+	afx_msg void OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnMove(int x, int y);
 };
 ;
