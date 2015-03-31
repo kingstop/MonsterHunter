@@ -734,10 +734,45 @@ void CactioncatchtoolDlg::createThreadEdit()
 
 }
 
+
+void CactioncatchtoolDlg::DrawLine(XnVector3D pos_1, XnVector3D pos_2)
+{
+	glVertex3f(pos_1.X, pos_1.Y, pos_1.Z);
+	glVertex3f(pos_2.X, pos_2.Y, pos_2.Z);
+
+}
+
+void CactioncatchtoolDlg::RenderPerson(XnVector3D frame_point[XN_SKEL_MAX])
+{
+	DrawLine( frame_point[XN_SKEL_HEAD], frame_point[XN_SKEL_NECK]);
+	DrawLine( frame_point[XN_SKEL_NECK], frame_point[XN_SKEL_LEFT_SHOULDER]);
+	DrawLine( frame_point[XN_SKEL_LEFT_SHOULDER], frame_point[XN_SKEL_LEFT_ELBOW]);
+	DrawLine( frame_point[XN_SKEL_LEFT_ELBOW], frame_point[XN_SKEL_LEFT_HAND]);
+
+	DrawLine( frame_point[XN_SKEL_NECK], frame_point[XN_SKEL_RIGHT_SHOULDER]);
+	DrawLine( frame_point[XN_SKEL_RIGHT_SHOULDER], frame_point[XN_SKEL_RIGHT_ELBOW]);
+	DrawLine( frame_point[XN_SKEL_RIGHT_ELBOW], frame_point[XN_SKEL_RIGHT_HAND]);
+
+	DrawLine( frame_point[XN_SKEL_LEFT_SHOULDER], frame_point[XN_SKEL_TORSO]);
+	DrawLine( frame_point[XN_SKEL_RIGHT_SHOULDER], frame_point[XN_SKEL_TORSO]);
+
+	DrawLine( frame_point[XN_SKEL_TORSO], frame_point[XN_SKEL_LEFT_HIP]);
+	DrawLine( frame_point[XN_SKEL_LEFT_HIP], frame_point[XN_SKEL_LEFT_KNEE]);
+	DrawLine( frame_point[XN_SKEL_LEFT_KNEE], frame_point[XN_SKEL_LEFT_FOOT]);
+
+	DrawLine( frame_point[XN_SKEL_TORSO], frame_point[XN_SKEL_RIGHT_HIP]);
+	DrawLine( frame_point[XN_SKEL_RIGHT_HIP], frame_point[XN_SKEL_RIGHT_KNEE]);
+	DrawLine( frame_point[XN_SKEL_RIGHT_KNEE], frame_point[XN_SKEL_RIGHT_FOOT]);
+	DrawLine( frame_point[XN_SKEL_LEFT_HIP], frame_point[XN_SKEL_RIGHT_HIP]);
+
+}
+
+
 void CactioncatchtoolDlg::RenderScene() {
-	glutDisplay();
-	SwapBuffers(hrenderDC);
-	//wglMakeCurrent(hrenderDC,hrenderRC );
+
+	wglMakeCurrent(hrenderDC,hrenderRC );
+	//glutDisplay();
+	//SwapBuffers(hrenderDC);
 
 	//glClear(GL_COLOR_BUFFER_BIT);
 	//glColor3f(1.0, 1.0, 1.0);
@@ -760,45 +795,89 @@ void CactioncatchtoolDlg::RenderScene() {
 
 	//////////////////////////////////////////////////////////////////////////
 
-//
-//	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//	// Setup the OpenGL viewpoint
-//	glMatrixMode(GL_PROJECTION);
-//	glPushMatrix();
-//	glLoadIdentity();
-//
-//	xn::SceneMetaData sceneMD;
-//	xn::DepthMetaData depthMD;
-//	g_DepthGenerator.GetMetaData(depthMD);
-//#ifndef USE_GLES
-//	glOrtho(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
-//#else
-//	glOrthof(0, depthMD.XRes(), depthMD.YRes(), 0, -1.0, 1.0);
-//#endif
-//
-//	glDisable(GL_TEXTURE_2D);
-//
-//	if (!g_bPause)
-//	{
-//		// Read next available data
-//		g_Context.WaitOneUpdateAll(g_UserGenerator);
-//	}
-//
-//	// Process the data
-//	g_DepthGenerator.GetMetaData(depthMD);
-//	g_UserGenerator.GetUserPixels(0, sceneMD);
-//	DrawDepthMap(depthMD, sceneMD);
-	//glEnd();
+
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Setup the OpenGL viewpoint
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	
+	xn::SceneMetaData sceneMD;
+	xn::DepthMetaData depthMD;
+	g_DepthGenerator.GetMetaData(depthMD);
+	
+	GLdouble right_temp = depthMD.XRes();
+	GLdouble bottom_temp = depthMD.YRes();
+
+
+	switch(g_catch_view_type)
+	{
+	case catch_view_catch:
+
+#ifndef USE_GLES
+		glOrtho(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+#else
+		glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+#endif
+		glDisable(GL_TEXTURE_2D);
+		if (!g_bPause)
+		{
+			// Read next available data
+			g_Context.WaitOneUpdateAll(g_UserGenerator);
+		}
+		// Process the data
+		g_DepthGenerator.GetMetaData(depthMD);
+		g_UserGenerator.GetUserPixels(0, sceneMD);
+		DrawDepthMap(depthMD, sceneMD);
+		glEnd();
+		break;
+	case catch_view_select:
+		framedata* temp = g_frameCatch.get_cur_select();
+		if (temp)
+		{
+#ifndef USE_GLES
+			glOrtho(0, right_temp, 1000, -1000, -1.0, 4000.0);
+#else
+			glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+#endif
+			RenderPerson(temp->frame_point);
+			//temp->frame_point[XN_SKEL_HEAD], XN_SKEL_HEAD
+			//DrawLimb(aUsers[i], XN_SKEL_HEAD, XN_SKEL_NECK);
+
+			//DrawLimb(aUsers[i], XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND);
+
+			//DrawLimb(aUsers[i], XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER);
+			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW);
+			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND);
+
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO);
+			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO);
+
+			//DrawLimb(aUsers[i], XN_SKEL_TORSO, XN_SKEL_LEFT_HIP);
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE);
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT);
+
+			//DrawLimb(aUsers[i], XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP);
+			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE);
+			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
+
+			//DrawLimb(aUsers[i], XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
+		}
+		break;
+	}
+
 
 
 	//glBegin(GL_LINES);
-	//glVertex3i(0.0, 1.0, 0.0);
-	//glVertex3i(-1.0, -1.0, 0.0);
-	//glVertex3i(-1.0, -1.0, 0.0);
-	//glVertex3i(1.0, -1.0, 0.0);
-	//glVertex3i(1.0, -1.0, 0.0);
-	//glVertex3i(0.0, 1.0, 0.0);
+	//glVertex3i(100, 100, 0.0);
+	//glVertex3i(200, 200, 0.0);
+	//glVertex3i(-0.5, -0.5, 0.0);
+	//glVertex3i(0.5, -0.5, 0.0);
+	//glVertex3i(0.5, -0.5, 0.0);
+	//glVertex3i(0.0, 0.5, 0.0);
 	//glEnd();
 
 	SwapBuffers(hrenderDC);    // 使用glFlush()没有显示？

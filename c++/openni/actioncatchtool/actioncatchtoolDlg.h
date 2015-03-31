@@ -44,12 +44,16 @@ protected:
 	BOOL SetWindowPixelFormat(HDC hDC);
 	BOOL CreateViewGLContext(HDC hDC, HGLRC& hGLRC);
 	void RenderScene();
+	void RenderPerson(XnVector3D frame_point[XN_SKEL_MAX]);
+	void DrawLine(XnVector3D pos_1, XnVector3D pos_2);
 
 
 	void createThreadSel();
 	void createThreadEdit();
 	void RenderSelFrameScene();
 	void RenderEditFrameScene();
+
+
 
 
 	DECLARE_MESSAGE_MAP()

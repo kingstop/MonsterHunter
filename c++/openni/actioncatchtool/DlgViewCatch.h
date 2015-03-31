@@ -17,10 +17,17 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 public:
 	CListBox _view_catch;
 	afx_msg void OnBnClickedBtnCatch();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedBtnUse();
+	afx_msg void OnLbnSelchangeListViewCatch();
+	void update_state_check();
+	afx_msg void OnBnClickedRadioCatch();
+	afx_msg void OnBnClickedRadioEdit();
+	afx_msg void OnBnClickedBtnDelete();
 };

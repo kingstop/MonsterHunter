@@ -25,3 +25,5 @@ XnBool g_bDrawPixels = TRUE;
 XnBool g_bDrawSkeleton = TRUE;
 XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
+
+catch_view_type g_catch_view_type;

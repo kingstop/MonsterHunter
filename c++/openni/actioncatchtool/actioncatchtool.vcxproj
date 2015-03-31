@@ -105,9 +105,11 @@
     <ClInclude Include="AcionCatchTool.h" />
     <ClInclude Include="actioncatchtool.h" />
     <ClInclude Include="actioncatchtoolDlg.h" />
+    <ClInclude Include="DlgSaveView.h" />
     <ClInclude Include="DlgViewCatch.h" />
     <ClInclude Include="DlgViewEdit.h" />
     <ClInclude Include="frameCatch.h" />
+    <ClInclude Include="frameStorage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SceneDrawer.h" />
     <ClInclude Include="stdafx.h" />
@@ -117,9 +119,11 @@
     <ClCompile Include="AcionCatchTool.cpp" />
     <ClCompile Include="actioncatchtool.cpp" />
     <ClCompile Include="actioncatchtoolDlg.cpp" />
+    <ClCompile Include="DlgSaveView.cpp" />
     <ClCompile Include="DlgViewCatch.cpp" />
     <ClCompile Include="DlgViewEdit.cpp" />
     <ClCompile Include="frameCatch.cpp" />
+    <ClCompile Include="frameStorage.cpp" />
     <ClCompile Include="SceneDrawer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

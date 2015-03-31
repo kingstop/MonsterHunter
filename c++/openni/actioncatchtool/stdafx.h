@@ -72,7 +72,21 @@
 #include <XnCppWrapper.h>
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
-
+#include "iostream"
+#include "map"
+#include "string"
+#include <XnOpenNI.h>
+#include <map>
+#include <iostream>
+#include <string>
+#include <vector>
+#define  XN_SKEL_MAX XN_SKEL_RIGHT_FOOT + 1
+#define  XN_SKEL_BEGIN XN_SKEL_HEAD
+enum catch_view_type
+{
+	catch_view_catch,
+	catch_view_select,
+};
 
 extern xn::UserGenerator g_UserGenerator;
 extern xn::DepthGenerator g_DepthGenerator;
@@ -89,5 +103,9 @@ extern xn::DepthGenerator g_DepthGenerator;
 extern xn::UserGenerator g_UserGenerator;
 extern xn::Player g_Player;
 
+extern catch_view_type g_catch_view_type;
+
+
 extern XnBool g_bNeedPose;
 extern XnChar g_strPose[20];
+
