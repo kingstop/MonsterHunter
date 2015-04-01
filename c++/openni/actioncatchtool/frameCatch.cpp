@@ -78,6 +78,15 @@ bool frameCatch::del_frame_data(const char* frame_name)
 
 void frameCatch::on_frame_deleted(const char* frame_named)
 {
-	//g_dlg->_page_view_catch->_view_catch.d
+	int count_temp = g_dlg->_page_view_catch->_view_catch.GetCount();
+	for (int i = 0; i < count_temp; i ++)
+	{
+		g_dlg->_page_view_catch->_view_catch.gets
+	}
+	
+
+
+	g_dlg->_page_view_catch->_view_catch.DeleteItem()
+	g_dlg->_page_view_catch->_view_catch.GetCurSel();
 
 }
