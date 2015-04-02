@@ -11,7 +11,9 @@
 #include <XnPropNames.h>
 
 
+
 frameCatch g_frameCatch;
+frameStorage g_frameStorage;
 xn::Context g_Context;
 xn::ScriptNode g_scriptNode;
 xn::DepthGenerator g_DepthGenerator;

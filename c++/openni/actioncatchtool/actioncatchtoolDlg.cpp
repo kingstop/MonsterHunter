@@ -619,7 +619,7 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	nRetVal = g_Context.StartGeneratingAll();
 	CHECK_RC(nRetVal, "StartGenerating");
 
-
+	//glutMainLoop();
 	// 设置计时器,10ms刷新一次
 	SetTimer(1, 10, 0);
 	// TODO: Add extra initialization here
@@ -737,13 +737,14 @@ void CactioncatchtoolDlg::createThreadEdit()
 
 void CactioncatchtoolDlg::DrawLine(XnVector3D pos_1, XnVector3D pos_2)
 {
-	glVertex3f(pos_1.X, pos_1.Y, pos_1.Z);
-	glVertex3f(pos_2.X, pos_2.Y, pos_2.Z);
+	glVertex3f(pos_1.X, pos_1.Y, 0);
+	glVertex3f(pos_2.X, pos_2.Y, 0);
 
 }
 
 void CactioncatchtoolDlg::RenderPerson(XnVector3D frame_point[XN_SKEL_MAX])
 {
+	glBegin(GL_LINES);
 	DrawLine( frame_point[XN_SKEL_HEAD], frame_point[XN_SKEL_NECK]);
 	DrawLine( frame_point[XN_SKEL_NECK], frame_point[XN_SKEL_LEFT_SHOULDER]);
 	DrawLine( frame_point[XN_SKEL_LEFT_SHOULDER], frame_point[XN_SKEL_LEFT_ELBOW]);
@@ -764,6 +765,7 @@ void CactioncatchtoolDlg::RenderPerson(XnVector3D frame_point[XN_SKEL_MAX])
 	DrawLine( frame_point[XN_SKEL_RIGHT_HIP], frame_point[XN_SKEL_RIGHT_KNEE]);
 	DrawLine( frame_point[XN_SKEL_RIGHT_KNEE], frame_point[XN_SKEL_RIGHT_FOOT]);
 	DrawLine( frame_point[XN_SKEL_LEFT_HIP], frame_point[XN_SKEL_RIGHT_HIP]);
+	glEnd();
 
 }
 
@@ -831,16 +833,24 @@ void CactioncatchtoolDlg::RenderScene() {
 		g_UserGenerator.GetUserPixels(0, sceneMD);
 		DrawDepthMap(depthMD, sceneMD);
 		glEnd();
+		/*		glBegin(GL_LINES);
+		glVertex3i(29.161575,62.882469, 0.0);
+		glVertex3i(19.128357, 60.578716, 0.0);
+		glEnd()*/;
 		break;
 	case catch_view_select:
 		framedata* temp = g_frameCatch.get_cur_select();
 		if (temp)
 		{
 #ifndef USE_GLES
-			glOrtho(0, right_temp, 1000, -1000, -1.0, 4000.0);
+			glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
 #else
-			glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+			glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
 #endif
+			//glBegin(GL_LINES);
+			//glVertex3i(71.579605,44.529907, 0.0);
+			//glVertex3i(72.475830, 73.108818, 0.0);
+			//glEnd();
 			RenderPerson(temp->frame_point);
 			//temp->frame_point[XN_SKEL_HEAD], XN_SKEL_HEAD
 			//DrawLimb(aUsers[i], XN_SKEL_HEAD, XN_SKEL_NECK);

@@ -8,7 +8,10 @@
 #define  XN_SKEL_BEGIN XN_SKEL_HEAD
 struct framedata{
 	XnVector3D frame_point[XN_SKEL_MAX];
+	XnVector3D frame_real_point[XN_SKEL_MAX];
 	std::string frame_name;
+	double right_temp;
+	double bottom_temp;
 };
 
 
@@ -20,7 +23,7 @@ public:
 	frameCatch(void);
 	~frameCatch(void);
 public:
-	void add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX]);
+	void add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX], XnVector3D realXnVector3Ds[XN_SKEL_MAX],double right_temp, double bottom_temp);
 	bool del_frame_data(const char* frame_name);
 	void on_frame_added(const char* frame_named);
 	void on_frame_deleted(const char* frame_named);

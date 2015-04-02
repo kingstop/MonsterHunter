@@ -135,19 +135,20 @@ void DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 	g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, eJoint1, joint1);
 	g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, eJoint2, joint2);
 
-	if (joint1.fConfidence < 0.5 || joint2.fConfidence < 0.5)
-	{
-		return;
-	}
+	//if (joint1.fConfidence < 0.5 || joint2.fConfidence < 0.5)
+	//{
+	//	return;
+	//}
 
 	XnPoint3D pt[2];
 	pt[0] = joint1.position;
 	pt[1] = joint2.position;
 
-	g_DepthGenerator.ConvertRealWorldToProjective(2, pt, pt);
+	XnPoint3D pt_temp[2];
+	g_DepthGenerator.ConvertRealWorldToProjective(2, pt, pt_temp);
 #ifndef USE_GLES
-	glVertex3i(pt[0].X, pt[0].Y, 0);
-	glVertex3i(pt[1].X, pt[1].Y, 0);
+	glVertex3i(pt_temp[0].X, pt_temp[0].Y, 0);
+	glVertex3i(pt_temp[1].X, pt_temp[1].Y, 0);
 #else
 	GLfloat verts[4] = {pt[0].X, pt[0].Y, pt[1].X, pt[1].Y};
 	glVertexPointer(2, GL_FLOAT, 0, verts);

@@ -43,3 +43,20 @@ bool frameStorage::modify_frame(const char* frame_name, CHECKDEGREES& temp_check
 	}
 	return true;
 }
+
+
+bool frameStorage::add_cur_sel(const char* save_temp_name)
+{
+	framedata* temp_data = g_frameCatch.get_cur_select();
+	if (temp_data)
+	{
+		if (_frame_checks.find(save_temp_name) != _frame_checks.end())
+		{
+			return false;
+		}
+		
+	}
+	add_frame_check(save_temp_name, temp_data->frame_point);
+	return true;
+
+}

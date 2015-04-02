@@ -5,6 +5,7 @@
 #include "actioncatchtool.h"
 #include "DlgViewCatch.h"
 #include "afxdialogex.h"
+#include "DlgSaveView.h"
 
 
 // DlgViewCatch dialog
@@ -62,18 +63,31 @@ void DlgViewCatch::OnBnClickedBtnCatch()
 	}
 	if (g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[0]))
 	{
+		xn::SceneMetaData sceneMD;
+		xn::DepthMetaData depthMD;
+		g_DepthGenerator.GetMetaData(depthMD);
+
+		GLdouble right_temp = depthMD.XRes();
+		GLdouble bottom_temp = depthMD.YRes();
 
 		XnVector3D XnVector3Ds[XN_SKEL_MAX];
+		XnVector3D realXnVector3Ds[XN_SKEL_MAX];
 		for (int i = XN_SKEL_BEGIN; i < XN_SKEL_MAX; i ++)
 		{
 			XnSkeletonJointPosition joint1;	
-			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(1, (XnSkeletonJoint)i, joint1);
-			XnVector3Ds[i].X = joint1.position.X;
-			XnVector3Ds[i].Y = joint1.position.Y;
-			XnVector3Ds[i].Z = joint1.position.Z;
-
+			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[0], (XnSkeletonJoint)i, joint1);
+			XnPoint3D pt = joint1.position;
+			XnPoint3D pt_temp;
+			
+			g_DepthGenerator.ConvertRealWorldToProjective(1, &pt, &pt_temp);
+			XnVector3Ds[i].X = pt_temp.X;
+			XnVector3Ds[i].Y = pt_temp.Y;
+			XnVector3Ds[i].Z = pt_temp.Z;
+			realXnVector3Ds[i].X = joint1.position.X;
+			realXnVector3Ds[i].Y = joint1.position.Y;
+			realXnVector3Ds[i].Z = joint1.position.Z;
 		}
-		g_frameCatch.add_frame_data(XnVector3Ds);
+		g_frameCatch.add_frame_data(XnVector3Ds, realXnVector3Ds, right_temp, bottom_temp);
 	}
 	
 
@@ -94,6 +108,10 @@ BOOL DlgViewCatch::PreTranslateMessage(MSG* pMsg)
 
 void DlgViewCatch::OnBnClickedBtnUse()
 {
+
+	DlgSaveView dlg(this);
+	int iRet = dlg.DoModal();
+
 	// TODO: Add your control notification handler code here
 }
 

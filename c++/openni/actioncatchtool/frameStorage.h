@@ -24,6 +24,7 @@ public:
 public:
 	bool add_frame_check(const char* frame_name, XnVector3D temp_frame_point[XN_SKEL_MAX]);
 	bool modify_frame(const char* frame_name, CHECKDEGREES& temp_check_degrees);
+	bool add_cur_sel(const char* save_temp_name);
 
 
 protected:

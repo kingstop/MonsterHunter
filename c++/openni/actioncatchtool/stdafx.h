@@ -54,19 +54,6 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 #endif
-
-#include "frameCatch.h"
-
-#ifndef USE_GLES
-#if (XN_PLATFORM == XN_PLATFORM_MACOSX)
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-#else
-#include "opengles.h"
-#endif
-
 #include <XnOpenNI.h>
 #include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
@@ -80,6 +67,21 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "frameCatch.h"
+#include "frameStorage.h"
+
+#ifndef USE_GLES
+#if (XN_PLATFORM == XN_PLATFORM_MACOSX)
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+#else
+#include "opengles.h"
+#endif
+
+
 #define  XN_SKEL_MAX XN_SKEL_RIGHT_FOOT + 1
 #define  XN_SKEL_BEGIN XN_SKEL_HEAD
 enum catch_view_type
@@ -97,6 +99,7 @@ extern XnBool g_bDrawSkeleton;
 extern XnBool g_bPrintID;
 extern XnBool g_bPrintState;
 extern frameCatch g_frameCatch;
+extern frameStorage g_frameStorage;
 extern xn::Context g_Context;
 extern xn::ScriptNode g_scriptNode;
 extern xn::DepthGenerator g_DepthGenerator;

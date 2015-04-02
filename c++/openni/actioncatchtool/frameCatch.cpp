@@ -15,19 +15,19 @@ frameCatch::~frameCatch(void)
 }
 
 
-void frameCatch::add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX])
+void frameCatch::add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX], XnVector3D realXnVector3Ds[XN_SKEL_MAX],double right_temp, double bottom_temp)
 {
 	framedata* temp_frame = new framedata();	
-	for (int i = XN_SKEL_BEGIN; i < XN_SKEL_MAX; i ++)
-	{
-		temp_frame->frame_point[i] = XnVector3Ds[i];
-	}
+	memcpy(temp_frame->frame_point, XnVector3Ds, sizeof(XnVector3Ds));
+	memcpy(temp_frame->frame_real_point, realXnVector3Ds, sizeof(realXnVector3Ds));
 
 	time_t t = time(0); 
 	char tmp[64]; 
 	tm* temp_t = localtime(&t);
 	sprintf(tmp, "%d/%d/%d %d:%d:%d", temp_t->tm_year, temp_t->tm_mon, temp_t->tm_mday, temp_t->tm_hour, temp_t->tm_min, temp_t->tm_sec);
 	temp_frame->frame_name = tmp;
+	temp_frame->right_temp = right_temp;
+	temp_frame->bottom_temp = bottom_temp;
 	FRAME_STORAGE::iterator it = _frame_data.find(temp_frame->frame_name);
 	if (it != _frame_data.end())
 	{
@@ -81,12 +81,12 @@ void frameCatch::on_frame_deleted(const char* frame_named)
 	int count_temp = g_dlg->_page_view_catch->_view_catch.GetCount();
 	for (int i = 0; i < count_temp; i ++)
 	{
-		g_dlg->_page_view_catch->_view_catch.gets
+		CString temp_string;
+		g_dlg->_page_view_catch->_view_catch.GetText(i, temp_string);
+		if (frame_named == temp_string)
+		{
+			g_dlg->_page_view_catch->_view_catch.DeleteString(i);
+			break;
+		}
 	}
-	
-
-
-	g_dlg->_page_view_catch->_view_catch.DeleteItem()
-	g_dlg->_page_view_catch->_view_catch.GetCurSel();
-
 }
