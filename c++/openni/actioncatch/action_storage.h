@@ -23,6 +23,8 @@ struct player_frames{
 	int player_id;
 	std::vector<std::string> frames;
 };
+
+int getangleforposition(XnVector3D position_1, XnVector3D position_2, XnVector3D position_3);
 class action_storage
 {
 public:
