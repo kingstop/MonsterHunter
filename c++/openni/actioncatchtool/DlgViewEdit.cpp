@@ -147,6 +147,7 @@ BEGIN_MESSAGE_MAP(DlgViewEdit, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO_1, &DlgViewEdit::OnCbnSelchangeCombo1)
 	ON_CBN_SELCHANGE(IDC_COMBO_2, &DlgViewEdit::OnCbnSelchangeCombo2)
 	ON_CBN_SELCHANGE(IDC_COMBO_3, &DlgViewEdit::OnCbnSelchangeCombo3)
+	ON_BN_CLICKED(IDC_BTN_SAVE_ALL, &DlgViewEdit::OnBnClickedBtnSaveAll)
 END_MESSAGE_MAP()
 
 
@@ -212,11 +213,13 @@ void DlgViewEdit::OnBnClickedBtnSaveCheck()
 	XnSkeletonJoint pos_temp[3];
 	for (int i = 0; i < 3; i ++)
 	{
-		pos_temp[i] = (XnSkeletonJoint)_combo_[0].GetCurSel();
+		pos_temp[i] = (XnSkeletonJoint)getCombox(i);
 	}
 
 	if (pos_temp[0] == pos_temp[1] || pos_temp[1] == pos_temp[2] || pos_temp[2] == pos_temp[0])
 	{
+		AfxMessageBox("三个点不能重复", MB_OK);
+		return;
 		// messagebox 不能重复
 	}
 	
@@ -256,6 +259,7 @@ void DlgViewEdit::OnBnClickedBtnSaveCheck()
 		entry_temp.degree = Number_temp;
 
 		_degrees.insert(CHECKDEGREES::value_type(edit_name,entry_temp ));
+		_frame_checks.AddString(edit_name.c_str());
 	}
 	else
 	{
@@ -267,23 +271,36 @@ void DlgViewEdit::OnBnClickedBtnSaveCheck()
 		edit_name = save_name;
 	}
 
+	frame_check* temp = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
+	temp->check_degrees = _degrees;
+	updateCombox();
 	// TODO: Add your control notification handler code here
 }
 
 
 void DlgViewEdit::OnCbnSelchangeCombo1()
 {
+	updateCombox();
 	// TODO: Add your control notification handler code here
 }
 
 
 void DlgViewEdit::OnCbnSelchangeCombo2()
 {
+	updateCombox();
 	// TODO: Add your control notification handler code here
 }
 
 
 void DlgViewEdit::OnCbnSelchangeCombo3()
 {
+	updateCombox();
+	// TODO: Add your control notification handler code here
+}
+
+
+void DlgViewEdit::OnBnClickedBtnSaveAll()
+{
+	g_frameStorage.save();
 	// TODO: Add your control notification handler code here
 }

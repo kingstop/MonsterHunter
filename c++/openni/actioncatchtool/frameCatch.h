@@ -23,6 +23,8 @@ public:
 	frameCatch(void);
 	~frameCatch(void);
 public:
+	void save();
+	void load();
 	void add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX], XnVector3D realXnVector3Ds[XN_SKEL_MAX],double right_temp, double bottom_temp);
 	bool del_frame_data(const char* frame_name);
 	void on_frame_added(const char* frame_named);

@@ -15,6 +15,40 @@ frameCatch::~frameCatch(void)
 }
 
 
+void frameCatch::save()
+{
+	
+	FILE* fp = fopen("frameCatch.data", "wb+");
+	if (fp)
+	{
+		int count_temp =  _frame_data.size();
+		int size_temp = sizeof(count_temp);
+		int current = 0;
+
+		fseek(fp, 0, SEEK_SET);
+		fwrite(&count_temp, size_temp, 1, fp);
+		current += size_temp;
+
+		fseek(fp, current, SEEK_SET);
+
+		FRAME_STORAGE::iterator it = _frame_data.begin();
+		for (int i = 0; i < count_temp; i ++, ++ it)
+		{
+
+		}
+
+
+		
+
+	}
+
+}
+
+void frameCatch::load()
+{
+
+}
+
 void frameCatch::add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX], XnVector3D realXnVector3Ds[XN_SKEL_MAX],double right_temp, double bottom_temp)
 {
 	framedata* temp_frame = new framedata();	

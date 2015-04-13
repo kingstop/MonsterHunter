@@ -71,13 +71,197 @@ frameStorage::~frameStorage(void)
 {
 }
 
+void frameStorage::save()
+{
+	FILE* fp = fopen("frame_storage", "wb+");
+	if (fp)
+	{
+		int current = 0;
+		char sztemp[256];
+		fseek(fp,current,SEEK_SET);
+		int count_temp = 0;
+		int size_temp = sizeof(count_temp);
+		count_temp = _frame_checks.size();
+
+		fwrite(&count_temp, size_temp, 1, fp);
+		current += size_temp;
+		fseek(fp, current, SEEK_SET);
+		if (count_temp > 0)
+		{			
+			FRAME_CHECKS::iterator it = _frame_checks.begin();
+			for (int i = 0  ; i < count_temp; i ++, ++ it )
+			{
+				std::string frame_name = it->first;
+				frame_check* temp_check = it->second;
+				sprintf(sztemp, "%s", frame_name.c_str());
+				size_temp = sizeof(sztemp);
+				fwrite(sztemp, size_temp, 1, fp);			
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				size_temp = sizeof(temp_check->frame_point);
+				fwrite(temp_check->frame_point, size_temp, 1, fp);
+
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+				size_temp = sizeof(temp_check->frame_real_point);
+				fwrite(temp_check->frame_real_point, size_temp, 1, fp);
+
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				int coun_check_temp = temp_check->check_degrees.size();
+				size_temp = sizeof(coun_check_temp);
+				fwrite(&coun_check_temp, size_temp, 1, fp);
+
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+				if (coun_check_temp > 0)
+				{
+					CHECKDEGREES::iterator it_entry = temp_check->check_degrees.begin();
+
+					for (int j = 0; j < coun_check_temp; j ++, ++ it_entry)
+					{
+						sprintf(sztemp, "%s", it_entry->first);
+						size_temp = sizeof(sztemp);
+						fwrite(sztemp, size_temp, 1, fp);
+
+						current += size_temp;
+						fseek(fp, current, SEEK_SET);
+
+						check_degree temp_degree = it_entry->second;
+						size_temp = sizeof(temp_degree.pos);
+						fwrite(temp_degree.pos, size_temp, 1, fp);
+
+						current += size_temp;
+						fseek(fp, current, SEEK_SET);
+
+
+						size_temp = sizeof(temp_degree.degree);
+						fwrite(&(temp_degree.degree), size_temp, 1, fp);
+
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+
+
+						size_temp = sizeof(temp_degree.Recognize);
+						fwrite(&(temp_degree.Recognize), size_temp, 1, fp);
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+					}
+				}
+
+
+
+			}
+
+
+		}
+
+		fclose(fp);
+
+
+
+	}
+}
+
 void frameStorage::load()
 {
 	FILE* fp = fopen("frame_storage", "wb+");
 	if (fp)
 	{
-		int count_temp;
-		fread()
+		long length=0;//声明文件长度
+
+		fseek(fp,0,SEEK_END);//将文件内部指针放到文件最后面
+
+		length=ftell(fp);//读取文件指针的位置，得到文件字符的个数
+		
+
+		if (length != 0)
+		{
+			char sztemp[256];
+			int current = 0;
+			int count_temp;
+			fseek(fp,current,SEEK_SET);
+			int size_temp = sizeof(count_temp);
+			
+			fread(&count_temp, size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp,current,SEEK_SET);
+			frame_check* temp_check = NULL;
+
+
+			for (int i = 0; i < count_temp; i ++)
+			{
+				temp_check = new frame_check();
+				size_temp = sizeof(sztemp);
+				fread(sztemp, size_temp, 1, fp);				
+				temp_check->frame_name = sztemp;
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->frame_point);
+				fread(temp_check->frame_point, size_temp, 1, fp);
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->frame_real_point);
+				fread(temp_check->frame_real_point, size_temp, 1, fp);
+
+				int count_degrees;
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);				
+				size_temp = sizeof(count_degrees);
+				fread(&count_degrees, size_temp, 1, fp);
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				if (count_degrees > 0)
+				{
+					check_degree temp_degree;
+					std::string temp_degree_name;
+
+
+					for (int j = 0; j < count_degrees; j ++)
+					{
+						size_temp = sizeof(sztemp);
+						fread(sztemp, size_temp, 1, fp);
+						
+						temp_degree_name = sztemp;
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+						
+						size_temp = sizeof(temp_degree.pos);
+						fread(temp_degree.pos, size_temp, 1, fp);
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+
+						size_temp = sizeof(temp_degree.degree);
+						fread(&(temp_degree.degree), size_temp, 1, fp);
+
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+
+
+						size_temp = sizeof(temp_degree.Recognize);
+						fread(&(temp_degree.Recognize), size_temp, 1, fp);
+
+						current += size_temp;
+						fseek(fp,current,SEEK_SET);
+
+						temp_check->check_degrees.insert(CHECKDEGREES::value_type(temp_degree_name, temp_degree));
+					}
+				}
+				_frame_checks.insert(FRAME_CHECKS::value_type(temp_check->frame_name, temp_check));
+				
+			}			
+		}
+		fclose(fp);
 	}
 }
 

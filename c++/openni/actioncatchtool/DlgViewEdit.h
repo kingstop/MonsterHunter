@@ -41,4 +41,5 @@ public:
 	CHECKDEGREES _degrees;
 	CComboBox _combo_[3];
 
+	afx_msg void OnBnClickedBtnSaveAll();
 };
