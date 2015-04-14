@@ -648,7 +648,10 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	_page_view_catch->MoveWindow(&temp_rect);
 
 	_page_view_edit->MoveWindow(&temp_rect);
-	_page_view_catch->ShowWindow(TRUE);
+	g_tab_view_type = tab_view_catch;
+	table_update();
+
+	//_page_view_catch->ShowWindow(TRUE);
 
 	//_tab_status.InsertItem(1,(LPCTSTR)" 嘻嘻 ");
 	//_tab_status.InsertItem(2,(LPCTSTR)" 哈哈，www.maoyeah.com ");
@@ -811,84 +814,99 @@ void CactioncatchtoolDlg::RenderScene() {
 	
 	GLdouble right_temp = depthMD.XRes();
 	GLdouble bottom_temp = depthMD.YRes();
-
-
-	switch(g_catch_view_type)
+	switch(g_tab_view_type)
 	{
-	case catch_view_catch:
-
-#ifndef USE_GLES
-		glOrtho(0, right_temp, bottom_temp, 0, -1.0, 1.0);
-#else
-		glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
-#endif
-		glDisable(GL_TEXTURE_2D);
-		if (!g_bPause)
+	case tab_view_catch:
 		{
-			// Read next available data
-			g_Context.WaitOneUpdateAll(g_UserGenerator);
+				switch(g_catch_view_type)
+				{
+				case catch_view_catch:
+
+			#ifndef USE_GLES
+					glOrtho(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+			#else
+					glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+			#endif
+					glDisable(GL_TEXTURE_2D);
+					if (!g_bPause)
+					{
+						// Read next available data
+						g_Context.WaitOneUpdateAll(g_UserGenerator);
+					}
+					// Process the data
+					g_DepthGenerator.GetMetaData(depthMD);
+					g_UserGenerator.GetUserPixels(0, sceneMD);
+					DrawDepthMap(depthMD, sceneMD);
+					glEnd();
+					/*		glBegin(GL_LINES);
+					glVertex3i(29.161575,62.882469, 0.0);
+					glVertex3i(19.128357, 60.578716, 0.0);
+					glEnd()*/;
+					break;
+				case catch_view_select:
+					framedata* temp = g_frameCatch.get_cur_select();
+					if (temp)
+					{
+			#ifndef USE_GLES
+						glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+			#else
+						glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+			#endif
+						RenderPerson(temp->frame_point);
+
+					}
+					break;
+				}
 		}
-		// Process the data
-		g_DepthGenerator.GetMetaData(depthMD);
-		g_UserGenerator.GetUserPixels(0, sceneMD);
-		DrawDepthMap(depthMD, sceneMD);
-		glEnd();
-		/*		glBegin(GL_LINES);
-		glVertex3i(29.161575,62.882469, 0.0);
-		glVertex3i(19.128357, 60.578716, 0.0);
-		glEnd()*/;
 		break;
-	case catch_view_select:
-		framedata* temp = g_frameCatch.get_cur_select();
-		if (temp)
+
+	case tab_view_edit:
 		{
-#ifndef USE_GLES
-			glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
-#else
-			glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
-#endif
-			//glBegin(GL_LINES);
-			//glVertex3i(71.579605,44.529907, 0.0);
-			//glVertex3i(72.475830, 73.108818, 0.0);
-			//glEnd();
-			RenderPerson(temp->frame_point);
-			//temp->frame_point[XN_SKEL_HEAD], XN_SKEL_HEAD
-			//DrawLimb(aUsers[i], XN_SKEL_HEAD, XN_SKEL_NECK);
 
-			//DrawLimb(aUsers[i], XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND);
-
-			//DrawLimb(aUsers[i], XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER);
-			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW);
-			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND);
-
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO);
-			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO);
-
-			//DrawLimb(aUsers[i], XN_SKEL_TORSO, XN_SKEL_LEFT_HIP);
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE);
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT);
-
-			//DrawLimb(aUsers[i], XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP);
-			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE);
-			//DrawLimb(aUsers[i], XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
-
-			//DrawLimb(aUsers[i], XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
 		}
 		break;
 	}
 
+//	switch(g_catch_view_type)
+//	{
+//	case catch_view_catch:
+//
+//#ifndef USE_GLES
+//		glOrtho(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+//#else
+//		glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
+//#endif
+//		glDisable(GL_TEXTURE_2D);
+//		if (!g_bPause)
+//		{
+//			// Read next available data
+//			g_Context.WaitOneUpdateAll(g_UserGenerator);
+//		}
+//		// Process the data
+//		g_DepthGenerator.GetMetaData(depthMD);
+//		g_UserGenerator.GetUserPixels(0, sceneMD);
+//		DrawDepthMap(depthMD, sceneMD);
+//		glEnd();
+//		/*		glBegin(GL_LINES);
+//		glVertex3i(29.161575,62.882469, 0.0);
+//		glVertex3i(19.128357, 60.578716, 0.0);
+//		glEnd()*/;
+//		break;
+//	case catch_view_select:
+//		framedata* temp = g_frameCatch.get_cur_select();
+//		if (temp)
+//		{
+//#ifndef USE_GLES
+//			glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+//#else
+//			glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+//#endif
+//			RenderPerson(temp->frame_point);
+//
+//		}
+//		break;
+	}
 
-
-	//glBegin(GL_LINES);
-	//glVertex3i(100, 100, 0.0);
-	//glVertex3i(200, 200, 0.0);
-	//glVertex3i(-0.5, -0.5, 0.0);
-	//glVertex3i(0.5, -0.5, 0.0);
-	//glVertex3i(0.5, -0.5, 0.0);
-	//glVertex3i(0.0, 0.5, 0.0);
-	//glEnd();
 
 	SwapBuffers(hrenderDC);    // 使用glFlush()没有显示？
 }
@@ -956,6 +974,21 @@ void CactioncatchtoolDlg::OnLbnSelchangeListCatchFrames()
 	// TODO: Add your control notification handler code here
 }
 
+void CactioncatchtoolDlg::table_update()
+{
+	switch(g_tab_view_type)
+	{
+	case tab_view_catch:
+		_page_view_catch->ShowWindow(TRUE);
+		_page_view_edit->ShowWindow(FALSE);
+		break;
+	case tab_view_edit:
+		_page_view_catch->ShowWindow(FALSE);
+		_page_view_edit->ShowWindow(TRUE);
+		break;
+	}
+}
+
 
 void CactioncatchtoolDlg::OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -964,17 +997,9 @@ void CactioncatchtoolDlg::OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult)
 
 	int CurSel;
 	CurSel=_tab_status.GetCurSel();
-	switch(CurSel)
-	{
-	case 0:
-		_page_view_catch->ShowWindow(TRUE);
-		_page_view_edit->ShowWindow(FALSE);
-		break;
-	case 1:
-		_page_view_catch->ShowWindow(FALSE);
-		_page_view_edit->ShowWindow(TRUE);
-		break;
-	}
+	g_tab_view_type = (tab_view_type)CurSel;
+	table_update();
+
 }
 
 

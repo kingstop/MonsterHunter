@@ -29,3 +29,5 @@ XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
 
 catch_view_type g_catch_view_type;
+
+tab_view_type g_tab_view_type;

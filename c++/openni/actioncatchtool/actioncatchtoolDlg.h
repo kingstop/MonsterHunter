@@ -53,6 +53,8 @@ protected:
 	void RenderSelFrameScene();
 	void RenderEditFrameScene();
 
+	void table_update();
+
 
 
 

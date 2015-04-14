@@ -275,9 +275,12 @@ bool frameStorage::add_frame_check(const char* frame_name, XnVector3D temp_frame
 	}
 	frame_check* framecheck = new frame_check();
 	framecheck->frame_name = frame_name;
-	memcpy(framecheck->frame_point, temp_frame_point, sizeof(temp_frame_point) );	
-	memcpy(framecheck->frame_real_point, temp_real_frame_point, sizeof(temp_real_frame_point));
+	for (int i = XN_SKEL_BEGIN; i < XN_SKEL_MAX; i ++)
+	{
+		framecheck->frame_point[i] = temp_frame_point[i];
+		framecheck->frame_real_point[i] = temp_real_frame_point[i];
 
+	}
 	_frame_checks.insert(FRAME_CHECKS::value_type(framecheck->frame_name,framecheck));
 	on_add_frame(frame_name);
 	return true;

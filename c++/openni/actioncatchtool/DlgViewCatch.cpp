@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(DlgViewCatch, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_CATCH, &DlgViewCatch::OnBnClickedRadioCatch)
 	ON_BN_CLICKED(IDC_RADIO_EDIT, &DlgViewCatch::OnBnClickedRadioEdit)
 	ON_BN_CLICKED(IDC_BTN_DELETE, &DlgViewCatch::OnBnClickedBtnDelete)
+	ON_BN_CLICKED(IDC_BTN_CATCH_SAVE, &DlgViewCatch::OnBnClickedBtnCatchSave)
 END_MESSAGE_MAP()
 
 
@@ -49,6 +50,7 @@ BOOL DlgViewCatch::OnInitDialog()
 	CDialogEx::OnInitDialog();
 	((CButton* )GetDlgItem(IDC_RADIO_CATCH))->SetCheck(1);
 	update_state_check();
+	g_frameCatch.load();
 	return TRUE;
 
 }
@@ -158,5 +160,13 @@ void DlgViewCatch::OnBnClickedBtnDelete()
 {
 	g_frameCatch.del_frame_data(g_frameCatch._cur_sel_catch_frame.c_str());
 	//g_frameCatch
+	// TODO: Add your control notification handler code here
+}
+
+
+void DlgViewCatch::OnBnClickedBtnCatchSave()
+{
+	g_frameCatch.save();
+	//g_frameCatch.load();
 	// TODO: Add your control notification handler code here
 }

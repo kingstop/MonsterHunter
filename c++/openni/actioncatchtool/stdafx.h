@@ -90,6 +90,12 @@ enum catch_view_type
 	catch_view_select,
 };
 
+enum tab_view_type
+{
+	tab_view_catch,
+	tab_view_edit
+};
+
 extern xn::UserGenerator g_UserGenerator;
 extern xn::DepthGenerator g_DepthGenerator;
 
@@ -107,6 +113,8 @@ extern xn::UserGenerator g_UserGenerator;
 extern xn::Player g_Player;
 
 extern catch_view_type g_catch_view_type;
+extern tab_view_type g_tab_view_type;
+
 
 
 extern XnBool g_bNeedPose;

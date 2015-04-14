@@ -18,6 +18,22 @@ frameCatch::~frameCatch(void)
 void frameCatch::save()
 {
 	
+	framedata* frame_data_temp = new framedata();
+	frame_data_temp->frame_name = "4334";
+	frame_data_temp->bottom_temp = 1231;
+	frame_data_temp->right_temp = 1231;
+	XnVector3D entry_3d;
+	entry_3d.X = 32.1f;
+	entry_3d.Y = 33.1f;
+	entry_3d.Z = 34.1f;
+	frame_data_temp->frame_point[0] = entry_3d;
+	frame_data_temp->frame_real_point[0] = entry_3d;
+
+	entry_3d.X = 42.1f;
+	entry_3d.Y = 43.1f;
+	entry_3d.Z = 44.1f;
+	frame_data_temp->frame_point[1] = entry_3d;
+	frame_data_temp->frame_real_point[1] = entry_3d;
 	FILE* fp = fopen("frameCatch.data", "wb+");
 	if (fp)
 	{
@@ -30,30 +46,129 @@ void frameCatch::save()
 		current += size_temp;
 
 		fseek(fp, current, SEEK_SET);
+		char sz_temp[256];
 
 		FRAME_STORAGE::iterator it = _frame_data.begin();
+		framedata* frame_data_temp = NULL;
+
 		for (int i = 0; i < count_temp; i ++, ++ it)
 		{
+			frame_data_temp = it->second;
+			size_temp = sizeof(sz_temp);
+			sprintf(sz_temp, "%s", frame_data_temp->frame_name.c_str());
+			fwrite(sz_temp, size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp, current, SEEK_SET);
 
-		}
+			size_temp = sizeof(frame_data_temp->bottom_temp);			
+			fwrite(&(frame_data_temp->bottom_temp), size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp, current, SEEK_SET);
 
 
-		
+			size_temp = sizeof(frame_data_temp->right_temp);			
+			fwrite(&(frame_data_temp->right_temp), size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp, current, SEEK_SET);
 
+			size_temp = sizeof(frame_data_temp->frame_point);
+			fwrite(&(frame_data_temp->frame_point), size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp, current, SEEK_SET);
+
+			size_temp = sizeof(frame_data_temp->frame_real_point);
+			fwrite(&(frame_data_temp->frame_real_point), size_temp, 1, fp);
+			current += size_temp;
+			fseek(fp, current, SEEK_SET);
+
+			//_frame_data.insert(FRAME_STORAGE::value_type(frame_data_temp->frame_name, frame_data_temp));
+		}		
+
+		fseek(fp, 0, SEEK_END);
+		int length_entry = ftell(fp);
+		fclose(fp);
 	}
+
+	 fp = fopen("frameCatch.data", "rb");
+	 fseek(fp, 0, SEEK_END);
+	 int length_entry = ftell(fp);
+	 fclose(fp);
 
 }
 
 void frameCatch::load()
 {
+	FILE* fp = fopen("frameCatch.data", "rb");
+	if (fp)
+	{
+		int count_temp =  _frame_data.size();
+		int size_temp = sizeof(count_temp);
+		int current = 0;
 
+		fseek(fp, 0, SEEK_END);
+		int length_entry = ftell(fp);
+		if (length_entry != 0)
+		{
+			fseek(fp, 0, SEEK_SET);
+			fread(&count_temp, size_temp, 1, fp);
+			current += size_temp;
+
+			fseek(fp, current, SEEK_SET);
+			char sz_temp[256];		
+			framedata* frame_data_temp = NULL;
+
+			for (int i = 0; i < count_temp; i ++)
+			{
+				frame_data_temp = new framedata();
+				size_temp = sizeof(sz_temp);
+				fread(sz_temp, size_temp, 1, fp);
+				frame_data_temp->frame_name = sz_temp;
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				size_temp = sizeof(frame_data_temp->bottom_temp);			
+				fread(&(frame_data_temp->bottom_temp), size_temp, 1, fp);
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+
+				size_temp = sizeof(frame_data_temp->right_temp);			
+				fread(&(frame_data_temp->right_temp), size_temp, 1, fp);
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				size_temp = sizeof(frame_data_temp->frame_point);
+				fread(&(frame_data_temp->frame_point), size_temp, 1, fp);
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				size_temp = sizeof(frame_data_temp->frame_real_point);
+				fread(&(frame_data_temp->frame_real_point), size_temp, 1, fp);
+				current += size_temp;
+				fseek(fp, current, SEEK_SET);
+
+				_frame_data.insert(FRAME_STORAGE::value_type(frame_data_temp->frame_name, frame_data_temp));
+				on_frame_added(frame_data_temp->frame_name.c_str());
+			}		
+		}
+
+
+
+		fclose(fp);
+	}
 }
 
 void frameCatch::add_frame_data(XnVector3D XnVector3Ds[XN_SKEL_MAX], XnVector3D realXnVector3Ds[XN_SKEL_MAX],double right_temp, double bottom_temp)
 {
 	framedata* temp_frame = new framedata();	
-	memcpy(temp_frame->frame_point, XnVector3Ds, sizeof(XnVector3Ds));
-	memcpy(temp_frame->frame_real_point, realXnVector3Ds, sizeof(realXnVector3Ds));
+	for (int i = XN_SKEL_BEGIN; i < XN_SKEL_MAX; i ++)
+	{
+		temp_frame->frame_point[i] = XnVector3Ds[i];
+		temp_frame->frame_real_point[i] = realXnVector3Ds[i];
+
+	}
+	//memcpy(temp_frame->frame_point, XnVector3Ds, sizeof(XnVector3Ds) * XN_SKEL_MAX);
+	//memcpy(temp_frame->frame_real_point, realXnVector3Ds, sizeof(realXnVector3Ds) * XN_SKEL_MAX);
 
 	time_t t = time(0); 
 	char tmp[64]; 

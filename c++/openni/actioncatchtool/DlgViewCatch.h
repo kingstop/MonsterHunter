@@ -30,4 +30,5 @@ public:
 	afx_msg void OnBnClickedRadioCatch();
 	afx_msg void OnBnClickedRadioEdit();
 	afx_msg void OnBnClickedBtnDelete();
+	afx_msg void OnBnClickedBtnCatchSave();
 };

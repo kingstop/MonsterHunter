@@ -30,6 +30,7 @@ BOOL DlgViewEdit::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();	
 	resetCombox();
+	SetDlgItemInt(IDC_EDIT_DEGREE, 0);
 	return TRUE;
 }
 
@@ -74,21 +75,23 @@ void DlgViewEdit::updateCombox()
 	
 	frame_check* frame_temp = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
 	std::string str_angle = "无可编辑对象";
+	int angle = 0;
 	if (frame_temp)
 	{
 		for (int i = 0; i < 3; i ++)
 		{
-			point_3d[i] =  frame_temp->frame_real_point[i];
+			point_3d[i] =  frame_temp->frame_real_point[getCombox(i)];
 		}
-		int angle = getangleforposition(point_3d[0], point_3d[1], point_3d[2]);
+		angle = getangleforposition(point_3d[0], point_3d[1], point_3d[2]);
 		char sz_temp[128];
 		sprintf(sz_temp, " %d ", angle);
 		str_angle = sz_temp;
 	}
-	SetDlgItemText(IDC_EDIT_DEGREE,str_angle.c_str()); 
+	SetDlgItemInt(IDC_EDIT_DEGREE,angle); 
 
 	std::string save_name;
 	CHECKDEGREES::iterator it = _degrees.begin();
+	int tem_number = 0;
 	for (; it != _degrees.end(); ++ it)
 	{
 		check_degree entry_temp = it->second;
@@ -97,6 +100,7 @@ void DlgViewEdit::updateCombox()
 			if ((entry_temp.pos[0] == enType[0] && entry_temp.pos[2] == enType[2]) ||(entry_temp.pos[0] == enType[2] && entry_temp.pos[2] == enType[0]))
 			{
 				save_name = it->first;
+				tem_number = it->second.Recognize;
 				break;
 			}
 		}
@@ -115,7 +119,7 @@ void DlgViewEdit::updateCombox()
 			_frame_checks.GetText(i, str_temp);
 			if (current_temp == str_temp)
 			{
-				_frame_checks.SetCurSel(i);
+				_frame_checks.SetCurSel(i);				
 				have_check = true;
 				break;
 			}
@@ -124,7 +128,9 @@ void DlgViewEdit::updateCombox()
 	else
 	{
 		_frame_checks.SetSel(_frame_checks.GetCurSel(), FALSE);
+
 	}
+	SetDlgItemInt(IDC_EDIT_RECOGNIZE, tem_number);
 
 }
 
@@ -160,6 +166,8 @@ void DlgViewEdit::OnLbnSelchangeListFrameEdit()
 	CString temp_str;
 	_edit_frames.GetText(cur_sel,temp_str);
 	g_frameStorage._cur_sel = temp_str;
+	_frame_checks.ResetContent();
+
 	frame_check* temp = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
 	
 	if (temp)
@@ -174,7 +182,7 @@ void DlgViewEdit::OnLbnSelchangeListFrameEdit()
 		}		
 	}
 
-
+	updateCombox();
 	
 
 	// TODO: Add your control notification handler code here
@@ -203,6 +211,7 @@ void DlgViewEdit::OnLbnSelchangeListFrameChecks()
 		sprintf(sztemp, "%d", temp.Recognize);
 		SetDlgItemText(IDC_EDIT_RECOGNIZE,sztemp); 
 	}
+	updateCombox();
 	// TODO: Add your control notification handler code here
 }
 
