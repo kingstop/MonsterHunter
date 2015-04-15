@@ -9,6 +9,7 @@
 #include "GL/glut.h"
 #include "DlgViewCatch.h"
 #include "DlgViewEdit.h"
+#include "DlgActionCheck.h"
 //#include "GL/glaux.h"    
 #include<windows.h>
 #include<strsafe.h>//win2003SDK必须安装　要不无此头文件。此文件是为了实现StringCchPrintf，StringCchLength。
@@ -627,11 +628,16 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 
 	_tab_status.InsertItem(0 ,(LPCTSTR)"骨骼捕捉");//InsertItem(0," 呵呵，茂叶工作室 ");
 	_tab_status.InsertItem(1 ,(LPCTSTR)"骨骼编辑");
+	_tab_status.InsertItem(2, (LPCTSTR)"动作匹配");
+
 	_page_view_catch = new DlgViewCatch(this);
 	_page_view_catch->Create(IDD_DIALOG_TAB_Catch, this);
 
 	_page_view_edit = new DlgViewEdit(this);
 	_page_view_edit->Create(IDD_DIALOG_TAB_Edit, this);
+
+	_page_view_action = new DlgActionCheck(this);
+	_page_view_action->Create(IDD_DIALOG_TAB_EDIT_ACTION, this);
 	CRect rect;
 	_tab_status.GetClientRect(&rect);
 	CRect temp_rect;
@@ -648,6 +654,8 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	_page_view_catch->MoveWindow(&temp_rect);
 
 	_page_view_edit->MoveWindow(&temp_rect);
+
+	_page_view_action->MoveWindow(&temp_rect);
 	g_tab_view_type = tab_view_catch;
 	table_update();
 
@@ -862,11 +870,26 @@ void CactioncatchtoolDlg::RenderScene() {
 
 	case tab_view_edit:
 		{
+			frame_check* temp_check_frame = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
+			if (temp_check_frame)
+			{
+				framedata* temp_check_frame = g_frameCatch.get_cur_select();
+				if (temp_check_frame)
+				{
+#ifndef USE_GLES
+					glOrtho(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+#else
+					glOrthof(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+#endif
+					RenderPerson(temp_check_frame->frame_point);
 
+				}
+				//temp_check_frame
+			}
 		}
 		break;
 	}
-
+	SwapBuffers(hrenderDC);    // 使用glFlush()没有显示？
 //	switch(g_catch_view_type)
 //	{
 //	case catch_view_catch:
@@ -905,10 +928,10 @@ void CactioncatchtoolDlg::RenderScene() {
 //
 //		}
 //		break;
-	}
+	//}
 
 
-	SwapBuffers(hrenderDC);    // 使用glFlush()没有显示？
+	
 }
 
 //
@@ -981,10 +1004,17 @@ void CactioncatchtoolDlg::table_update()
 	case tab_view_catch:
 		_page_view_catch->ShowWindow(TRUE);
 		_page_view_edit->ShowWindow(FALSE);
+		_page_view_action->ShowWindow(FALSE);
 		break;
 	case tab_view_edit:
 		_page_view_catch->ShowWindow(FALSE);
 		_page_view_edit->ShowWindow(TRUE);
+		_page_view_action->ShowWindow(FALSE);
+		break;
+	case tab_view_action:
+		_page_view_catch->ShowWindow(FALSE);
+		_page_view_edit->ShowWindow(FALSE);
+		_page_view_action->ShowWindow(TRUE);
 		break;
 	}
 }
@@ -1016,6 +1046,7 @@ void CactioncatchtoolDlg::OnMove(int x, int y)
 		temp_rect.bottom = temp_rect.bottom - 4;
 		_page_view_catch->MoveWindow(&temp_rect);
 		_page_view_edit->MoveWindow(&temp_rect);
+		_page_view_action->MoveWindow(&temp_rect);
 	}
 
 	// TODO: Add your message handler code here

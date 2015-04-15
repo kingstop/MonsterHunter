@@ -17,20 +17,22 @@ struct frame_check
 	XnVector3D frame_real_point[XN_SKEL_MAX];
 	std::string frame_name;
 	CHECKDEGREES check_degrees;
+	double right_temp;
+	double bottom_temp;
 };
+typedef std::map<std::string, frame_check*> FRAME_CHECKS;
 
 int getangleforposition(XnVector3D position_1, XnVector3D position_2, XnVector3D position_3);
 class frameStorage
 {
-public:
-	typedef std::map<std::string, frame_check*> FRAME_CHECKS;
 public:
 	frameStorage(void);
 	~frameStorage(void);
 public:
 	void load();
 	void save();
-	bool add_frame_check(const char* frame_name, XnVector3D temp_frame_point[XN_SKEL_MAX], XnVector3D temp_real_frame_point[XN_SKEL_MAX]);
+	bool add_frame_check(const char* frame_name, XnVector3D temp_frame_point[XN_SKEL_MAX],
+		XnVector3D temp_real_frame_point[XN_SKEL_MAX], double right_temp, double bottom_temp);
 	bool modify_frame(const char* frame_name, CHECKDEGREES& temp_check_degrees);
 	bool add_cur_sel(const char* save_temp_name);
 

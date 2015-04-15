@@ -95,9 +95,22 @@ void frameStorage::save()
 				frame_check* temp_check = it->second;
 				sprintf(sztemp, "%s", frame_name.c_str());
 				size_temp = sizeof(sztemp);
-				fwrite(sztemp, size_temp, 1, fp);			
+				fwrite(sztemp, size_temp, 1, fp);	
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->right_temp);
+				fread(&(temp_check->right_temp), size_temp, 1, fp);
+
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->bottom_temp);
+				fread(&(temp_check->bottom_temp), size_temp, 1, fp);
+
 				current += size_temp;
 				fseek(fp, current, SEEK_SET);
+
 
 				size_temp = sizeof(temp_check->frame_point);
 				fwrite(temp_check->frame_point, size_temp, 1, fp);
@@ -122,7 +135,7 @@ void frameStorage::save()
 
 					for (int j = 0; j < coun_check_temp; j ++, ++ it_entry)
 					{
-						sprintf(sztemp, "%s", it_entry->first);
+						sprintf(sztemp, "%s", it_entry->first.c_str());
 						size_temp = sizeof(sztemp);
 						fwrite(sztemp, size_temp, 1, fp);
 
@@ -135,16 +148,12 @@ void frameStorage::save()
 
 						current += size_temp;
 						fseek(fp, current, SEEK_SET);
-
-
 						size_temp = sizeof(temp_degree.degree);
 						fwrite(&(temp_degree.degree), size_temp, 1, fp);
 
 
 						current += size_temp;
 						fseek(fp,current,SEEK_SET);
-
-
 						size_temp = sizeof(temp_degree.Recognize);
 						fwrite(&(temp_degree.Recognize), size_temp, 1, fp);
 
@@ -169,7 +178,7 @@ void frameStorage::save()
 
 void frameStorage::load()
 {
-	FILE* fp = fopen("frame_storage", "wb+");
+	FILE* fp = fopen("frame_storage", "rb");
 	if (fp)
 	{
 		long length=0;//声明文件长度
@@ -199,6 +208,19 @@ void frameStorage::load()
 				size_temp = sizeof(sztemp);
 				fread(sztemp, size_temp, 1, fp);				
 				temp_check->frame_name = sztemp;
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->right_temp);
+				fread(&(temp_check->right_temp), size_temp, 1, fp);
+
+
+				current += size_temp;
+				fseek(fp,current,SEEK_SET);
+				size_temp = sizeof(temp_check->bottom_temp);
+				fread(&(temp_check->bottom_temp), size_temp, 1, fp);
+
+
 
 				current += size_temp;
 				fseek(fp,current,SEEK_SET);
@@ -258,6 +280,7 @@ void frameStorage::load()
 					}
 				}
 				_frame_checks.insert(FRAME_CHECKS::value_type(temp_check->frame_name, temp_check));
+				on_add_frame(temp_check->frame_name.c_str());
 				
 			}			
 		}
@@ -266,7 +289,8 @@ void frameStorage::load()
 }
 
 
-bool frameStorage::add_frame_check(const char* frame_name, XnVector3D temp_frame_point[XN_SKEL_MAX], XnVector3D temp_real_frame_point[XN_SKEL_MAX])
+bool frameStorage::add_frame_check(const char* frame_name, XnVector3D temp_frame_point[XN_SKEL_MAX], XnVector3D temp_real_frame_point[XN_SKEL_MAX], 
+	double right_temp, double bottom_temp)
 {
 	FRAME_CHECKS::iterator it = _frame_checks.find(frame_name);
 	if (it != _frame_checks.end())
@@ -281,6 +305,9 @@ bool frameStorage::add_frame_check(const char* frame_name, XnVector3D temp_frame
 		framecheck->frame_real_point[i] = temp_real_frame_point[i];
 
 	}
+	framecheck->right_temp = right_temp;
+	framecheck->bottom_temp = bottom_temp;
+
 	_frame_checks.insert(FRAME_CHECKS::value_type(framecheck->frame_name,framecheck));
 	on_add_frame(frame_name);
 	return true;
@@ -312,10 +339,10 @@ bool frameStorage::add_cur_sel(const char* save_temp_name)
 		{
 			return false;
 		}
-		
+		add_frame_check(save_temp_name, temp_data->frame_point, temp_data->frame_real_point, temp_data->right_temp, temp_data->bottom_temp);
+		return true;	
 	}
-	add_frame_check(save_temp_name, temp_data->frame_point, temp_data->frame_real_point);
-	return true;
+	return false;
 }
 
 

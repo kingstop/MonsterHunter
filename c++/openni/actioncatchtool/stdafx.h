@@ -70,6 +70,7 @@
 
 #include "frameCatch.h"
 #include "frameStorage.h"
+#include "actionCheckStorage.h"
 
 #ifndef USE_GLES
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
@@ -93,7 +94,8 @@ enum catch_view_type
 enum tab_view_type
 {
 	tab_view_catch,
-	tab_view_edit
+	tab_view_edit,
+	tab_view_action
 };
 
 extern xn::UserGenerator g_UserGenerator;
@@ -106,6 +108,8 @@ extern XnBool g_bPrintID;
 extern XnBool g_bPrintState;
 extern frameCatch g_frameCatch;
 extern frameStorage g_frameStorage;
+extern actionCheckStorage g_actionCheckStorage;
+
 extern xn::Context g_Context;
 extern xn::ScriptNode g_scriptNode;
 extern xn::DepthGenerator g_DepthGenerator;

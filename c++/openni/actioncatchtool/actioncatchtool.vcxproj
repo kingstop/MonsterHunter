@@ -105,6 +105,9 @@
     <ClInclude Include="AcionCatchTool.h" />
     <ClInclude Include="actioncatchtool.h" />
     <ClInclude Include="actioncatchtoolDlg.h" />
+    <ClInclude Include="actionCheckStorage.h" />
+    <ClInclude Include="DlgActionCheck.h" />
+    <ClInclude Include="DlgSaveAction.h" />
     <ClInclude Include="DlgSaveView.h" />
     <ClInclude Include="DlgViewCatch.h" />
     <ClInclude Include="DlgViewEdit.h" />
@@ -119,6 +122,9 @@
     <ClCompile Include="AcionCatchTool.cpp" />
     <ClCompile Include="actioncatchtool.cpp" />
     <ClCompile Include="actioncatchtoolDlg.cpp" />
+    <ClCompile Include="actionCheckStorage.cpp" />
+    <ClCompile Include="DlgActionCheck.cpp" />
+    <ClCompile Include="DlgSaveAction.cpp" />
     <ClCompile Include="DlgSaveView.cpp" />
     <ClCompile Include="DlgViewCatch.cpp" />
     <ClCompile Include="DlgViewEdit.cpp" />

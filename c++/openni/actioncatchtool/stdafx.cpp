@@ -14,6 +14,7 @@
 
 frameCatch g_frameCatch;
 frameStorage g_frameStorage;
+actionCheckStorage g_actionCheckStorage;
 xn::Context g_Context;
 xn::ScriptNode g_scriptNode;
 xn::DepthGenerator g_DepthGenerator;

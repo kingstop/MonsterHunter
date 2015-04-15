@@ -8,6 +8,7 @@
 class CactioncatchtoolDlg;
 class DlgViewEdit;
 class DlgViewCatch;
+class DlgActionCheck;
 typedef struct _MyData{
 	int val1;
 	int val2;
@@ -79,6 +80,7 @@ public:
 	CTabCtrl _tab_status;
 	DlgViewEdit* _page_view_edit;
 	DlgViewCatch* _page_view_catch;
+	DlgActionCheck* _page_view_action;
 public:
 	afx_msg void OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnMove(int x, int y);

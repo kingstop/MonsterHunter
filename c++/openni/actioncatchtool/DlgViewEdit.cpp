@@ -31,6 +31,7 @@ BOOL DlgViewEdit::OnInitDialog()
 	CDialogEx::OnInitDialog();	
 	resetCombox();
 	SetDlgItemInt(IDC_EDIT_DEGREE, 0);
+	g_frameStorage.load();
 	return TRUE;
 }
 
@@ -311,5 +312,7 @@ void DlgViewEdit::OnCbnSelchangeCombo3()
 void DlgViewEdit::OnBnClickedBtnSaveAll()
 {
 	g_frameStorage.save();
+
+	//g_frameStorage.load();
 	// TODO: Add your control notification handler code here
 }
