@@ -368,6 +368,7 @@ CactioncatchtoolDlg::CactioncatchtoolDlg(CWnd* pParent /*=NULL*/)
 	_wnd_main_render = NULL;
 	_page_view_edit = NULL;
 	_page_view_catch = NULL;
+	_opennni_create_successful = false;
 
 }
 
@@ -448,6 +449,46 @@ BOOL CactioncatchtoolDlg::SetWindowPixelFormat(HDC hDC) { // CCOpenGLDlg¸ÄÎªÄã×Ô
 BOOL CactioncatchtoolDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	//glutMainLoop();
+	// ÉèÖÃ¼ÆÊ±Æ÷,10msË¢ÐÂÒ»´Î
+	SetTimer(1, 10, 0);
+	// TODO: Add extra initialization here
+
+
+	_tab_status.InsertItem(0 ,(LPCTSTR)"¹Ç÷À²¶×½");//InsertItem(0," ºÇºÇ£¬Ã¯Ò¶¹¤×÷ÊÒ ");
+	_tab_status.InsertItem(1 ,(LPCTSTR)"¹Ç÷À±à¼­");
+	_tab_status.InsertItem(2, (LPCTSTR)"¶¯×÷Æ¥Åä");
+
+	_page_view_catch = new DlgViewCatch(this);
+	_page_view_catch->Create(IDD_DIALOG_TAB_Catch, this);
+
+	_page_view_edit = new DlgViewEdit(this);
+	_page_view_edit->Create(IDD_DIALOG_TAB_Edit, this);
+
+	_page_view_action = new DlgActionCheck(this);
+	_page_view_action->Create(IDD_DIALOG_TAB_EDIT_ACTION, this);
+	CRect rect;
+	_tab_status.GetClientRect(&rect);
+	CRect temp_rect;
+	_tab_status.GetWindowRect(&temp_rect);
+	CRect temp_rect_main;
+	this->GetClientRect(temp_rect_main);
+	temp_rect.top = temp_rect.top + 20;
+	temp_rect.left = temp_rect.left + 2;
+	temp_rect.right = temp_rect.right - 4;
+	temp_rect.bottom = temp_rect.bottom - 4;
+
+
+
+	_page_view_catch->MoveWindow(&temp_rect);
+
+	_page_view_edit->MoveWindow(&temp_rect);
+
+	_page_view_action->MoveWindow(&temp_rect);
+	g_tab_view_type = tab_view_catch;
+	table_update();
+
 	//_tab_status.InsertItem();
 	// Add "About..." menu item to system menu.
 
@@ -527,7 +568,7 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	
 	//Initial();
 	glLoadIdentity();
-
+	
 	XnStatus nRetVal = XN_STATUS_OK;
 	xn::EnumerationErrors errors;
 	nRetVal = g_Context.InitFromXmlFile(SAMPLE_XML_PATH, g_scriptNode, &errors);
@@ -619,46 +660,9 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 
 	nRetVal = g_Context.StartGeneratingAll();
 	CHECK_RC(nRetVal, "StartGenerating");
+	_opennni_create_successful = true;
 
-	//glutMainLoop();
-	// ÉèÖÃ¼ÆÊ±Æ÷,10msË¢ÐÂÒ»´Î
-	SetTimer(1, 10, 0);
-	// TODO: Add extra initialization here
-
-
-	_tab_status.InsertItem(0 ,(LPCTSTR)"¹Ç÷À²¶×½");//InsertItem(0," ºÇºÇ£¬Ã¯Ò¶¹¤×÷ÊÒ ");
-	_tab_status.InsertItem(1 ,(LPCTSTR)"¹Ç÷À±à¼­");
-	_tab_status.InsertItem(2, (LPCTSTR)"¶¯×÷Æ¥Åä");
-
-	_page_view_catch = new DlgViewCatch(this);
-	_page_view_catch->Create(IDD_DIALOG_TAB_Catch, this);
-
-	_page_view_edit = new DlgViewEdit(this);
-	_page_view_edit->Create(IDD_DIALOG_TAB_Edit, this);
-
-	_page_view_action = new DlgActionCheck(this);
-	_page_view_action->Create(IDD_DIALOG_TAB_EDIT_ACTION, this);
-	CRect rect;
-	_tab_status.GetClientRect(&rect);
-	CRect temp_rect;
-	_tab_status.GetWindowRect(&temp_rect);
-	CRect temp_rect_main;
-	this->GetClientRect(temp_rect_main);
-	temp_rect.top = temp_rect.top + 20;
-	temp_rect.left = temp_rect.left + 2;
-	temp_rect.right = temp_rect.right - 4;
-	temp_rect.bottom = temp_rect.bottom - 4;
-
-
-
-	_page_view_catch->MoveWindow(&temp_rect);
-
-	_page_view_edit->MoveWindow(&temp_rect);
-
-	_page_view_action->MoveWindow(&temp_rect);
-	g_tab_view_type = tab_view_catch;
-	table_update();
-
+	
 	//_page_view_catch->ShowWindow(TRUE);
 
 	//_tab_status.InsertItem(1,(LPCTSTR)" ÎûÎû ");
@@ -816,16 +820,19 @@ void CactioncatchtoolDlg::RenderScene() {
 	glPushMatrix();
 	glLoadIdentity();
 	
-	xn::SceneMetaData sceneMD;
-	xn::DepthMetaData depthMD;
-	g_DepthGenerator.GetMetaData(depthMD);
-	
-	GLdouble right_temp = depthMD.XRes();
-	GLdouble bottom_temp = depthMD.YRes();
+
 	switch(g_tab_view_type)
 	{
 	case tab_view_catch:
 		{
+			if (_opennni_create_successful)
+			{
+			xn::SceneMetaData sceneMD;
+			xn::DepthMetaData depthMD;
+			g_DepthGenerator.GetMetaData(depthMD);
+
+			GLdouble right_temp = depthMD.XRes();
+			GLdouble bottom_temp = depthMD.YRes();
 				switch(g_catch_view_type)
 				{
 				case catch_view_catch:
@@ -865,6 +872,8 @@ void CactioncatchtoolDlg::RenderScene() {
 					}
 					break;
 				}
+			}
+
 		}
 		break;
 

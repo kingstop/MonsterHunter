@@ -67,7 +67,7 @@ public:
 	HDC hrenderDC;                                                            // DC
 	HGLRC hrenderRC;                                                        // RC
 	int PixelFormat;
-
+	bool _opennni_create_successful;
 
 
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
