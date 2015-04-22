@@ -5,6 +5,7 @@
 #include "actioncatchtool.h"
 #include "DlgActionCheck.h"
 #include "afxdialogex.h"
+#include "DlgSaveAction.h"
 
 
 // DlgActionCheck dialog
@@ -45,7 +46,8 @@ END_MESSAGE_MAP()
 
 void DlgActionCheck::OnBnClickedBtnNewAction()
 {
-
+	DlgSaveAction dlg(this);
+	int iRet = dlg.DoModal();
 	// TODO: Add your control notification handler code here
 }
 
@@ -61,12 +63,12 @@ void DlgActionCheck::OnLbnSelchangeListActions()
 		actionCheck* entry_check = g_actionCheckStorage.get_action(g_actionCheckStorage.cur_select.c_str());
 		if (entry_check)
 		{
-			_lits_actions.ResetContent();
+			_list_action_frames.ResetContent();
 			FRAMECHECKS::iterator it = entry_check->check_frames.begin();
 			for (; it != entry_check->check_frames.end(); ++ it)
 			{
 				frameCheck entry = (*it);
-				_lits_actions.AddString(entry.check_name.c_str());
+				_list_action_frames.AddString(entry.check_name.c_str());
 			}
 			//entry_check->check_frames
 		}

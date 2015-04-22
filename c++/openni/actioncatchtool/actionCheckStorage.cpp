@@ -16,6 +16,10 @@ actionCheckStorage::~actionCheckStorage(void)
 
 bool actionCheckStorage::add_action(const char* szname)
 {
+	if (szname == "")
+	{
+		return false;
+	}
 	ACTIONCHECKS::iterator it = _action_checks.find(szname);
 	if (it != _action_checks.end())
 	{
@@ -24,6 +28,7 @@ bool actionCheckStorage::add_action(const char* szname)
 	actionCheck* temp_enry = new actionCheck();
 	std::string str_name = szname;
 	_action_checks.insert(ACTIONCHECKS::value_type(str_name, temp_enry));
+	on_action_added(str_name.c_str());
 	return true;
 }
 

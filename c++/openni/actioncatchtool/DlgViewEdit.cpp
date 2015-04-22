@@ -155,6 +155,7 @@ BEGIN_MESSAGE_MAP(DlgViewEdit, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO_2, &DlgViewEdit::OnCbnSelchangeCombo2)
 	ON_CBN_SELCHANGE(IDC_COMBO_3, &DlgViewEdit::OnCbnSelchangeCombo3)
 	ON_BN_CLICKED(IDC_BTN_SAVE_ALL, &DlgViewEdit::OnBnClickedBtnSaveAll)
+	ON_BN_CLICKED(IDC_BTN_EDIT_DEL, &DlgViewEdit::OnBnClickedBtnEditDel)
 END_MESSAGE_MAP()
 
 
@@ -314,5 +315,19 @@ void DlgViewEdit::OnBnClickedBtnSaveAll()
 	g_frameStorage.save();
 
 	//g_frameStorage.load();
+	// TODO: Add your control notification handler code here
+}
+
+
+void DlgViewEdit::OnBnClickedBtnEditDel()
+{
+	CString temp_str;
+	_edit_frames.GetText(_edit_frames.GetCurSel(),temp_str);
+	std::string tempstr = temp_str;
+	bool del_temp = false;
+	if (tempstr.empty() == false)
+	{
+		del_temp = g_frameStorage.del_frame(tempstr.c_str());
+	}
 	// TODO: Add your control notification handler code here
 }

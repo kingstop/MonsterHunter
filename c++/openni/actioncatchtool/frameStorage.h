@@ -35,10 +35,13 @@ public:
 		XnVector3D temp_real_frame_point[XN_SKEL_MAX], double right_temp, double bottom_temp);
 	bool modify_frame(const char* frame_name, CHECKDEGREES& temp_check_degrees);
 	bool add_cur_sel(const char* save_temp_name);
+	bool del_frame(const char* del_temp_name);
 
 	frame_check* get_frame_check(const char* frame_name);
 
 	void on_add_frame(const char* save_temp_name);
+	void on_frame_del(const char* del_name);
+
 public:
 	std::string _cur_sel;
 

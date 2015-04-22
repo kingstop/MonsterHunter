@@ -42,8 +42,22 @@ void DlgSaveAction::OnBnClickedOk()
 	bool b = g_actionCheckStorage.add_action(cstr_temp);
 	if (b)
 	{
-
+		
+		
+	}
+	else
+	{
+		AfxMessageBox("ÃÌº” ß∞‹");
 	}
 	// TODO: Add your control notification handler code here
 	CDialogEx::OnOK();
+}
+
+BOOL  DlgSaveAction::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+	CRect rtClient;
+	GetWindowRect(rtClient);  	
+	::SetWindowPos(m_hWnd, HWND_TOPMOST, rtClient.left, rtClient.top, rtClient.Width(), rtClient.Height(), SWP_SHOWWINDOW); 
+	return TRUE;
 }

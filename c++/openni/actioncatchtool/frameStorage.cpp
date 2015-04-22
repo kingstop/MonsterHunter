@@ -4,6 +4,7 @@
 
 #include "actioncatchtoolDlg.h"
 #include "DlgViewEdit.h"
+#include "DlgActionCheck.h"
 int getangleforposition(XnVector3D position_1, XnVector3D position_2, XnVector3D position_3)
 {
 	double lineP1P2 = sqrt((double)((position_1.X - position_2.X) * (position_1.X - position_2.X) + (position_1.Y - position_2.Y) * (position_1.Y - position_2.Y) + (position_1.Z - position_2.Z) * (position_1.Z - position_2.Z)));
@@ -329,6 +330,48 @@ bool frameStorage::modify_frame(const char* frame_name, CHECKDEGREES& temp_check
 	return true;
 }
 
+bool frameStorage::del_frame(const char* del_temp_name)
+{
+	FRAME_CHECKS::iterator it = _frame_checks.find(del_temp_name);
+	if (it != _frame_checks.end())
+	{
+		_frame_checks.erase(it);
+		on_frame_del(del_temp_name);
+		return true;
+	}
+
+	return false;
+}
+
+void frameStorage::on_frame_del(const char* del_name)
+{
+	int temp_count = g_dlg->_page_view_edit->_edit_frames.GetCount();
+	CString temp_entry;
+	for (int i = 0; i < temp_count; i ++)
+	{
+		g_dlg->_page_view_edit->_edit_frames.GetText(i,temp_entry);
+		if (temp_entry == del_name)
+		{
+			g_dlg->_page_view_edit->_edit_frames.DeleteString(i);
+			break;
+		}
+	}
+
+
+	g_dlg->_page_view_action->_list_frame_source.GetCount();
+	
+	for (int i = 0; i < temp_count; i ++)
+	{
+		g_dlg->_page_view_action->_list_frame_source.GetText(i,temp_entry);
+		if (temp_entry == del_name)
+		{
+			g_dlg->_page_view_action->_list_frame_source.DeleteString(i);
+			break;
+		}
+	}
+
+
+}
 
 bool frameStorage::add_cur_sel(const char* save_temp_name)
 {
@@ -360,4 +403,5 @@ frame_check* frameStorage::get_frame_check(const char* frame_name)
 void frameStorage::on_add_frame(const char* save_temp_name)
 {
 	g_dlg->_page_view_edit->_edit_frames.AddString(save_temp_name);
+	g_dlg->_page_view_action->_list_frame_source.AddString(save_temp_name);
 }

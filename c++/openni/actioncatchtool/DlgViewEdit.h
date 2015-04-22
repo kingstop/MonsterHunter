@@ -42,4 +42,5 @@ public:
 	CComboBox _combo_[3];
 
 	afx_msg void OnBnClickedBtnSaveAll();
+	afx_msg void OnBnClickedBtnEditDel();
 };
