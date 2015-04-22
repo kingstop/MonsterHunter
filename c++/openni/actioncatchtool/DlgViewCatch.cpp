@@ -50,7 +50,6 @@ BOOL DlgViewCatch::OnInitDialog()
 	CDialogEx::OnInitDialog();
 	((CButton* )GetDlgItem(IDC_RADIO_CATCH))->SetCheck(1);
 	update_state_check();
-	g_frameCatch.load();
 	return TRUE;
 
 }

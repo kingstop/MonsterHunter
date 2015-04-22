@@ -80,9 +80,25 @@ void DlgActionCheck::OnLbnSelchangeListActions()
 
 void DlgActionCheck::OnLbnSelchangeListActionFrames()
 {
-	int cur_sel = _lits_actions.GetCurSel();
+	int cur_sel = _list_action_frames.GetCurSel();
 	CString temp_str;
-	_lits_actions.GetText(cur_sel,temp_str);
+	_list_action_frames.GetText(cur_sel,temp_str);
+
+	CString temp_action_name;
+	_lits_actions.GetText(_lits_actions.GetCurSel(), temp_action_name);
+	actionCheck* action_check_entry = g_actionCheckStorage.get_action(temp_action_name);
+	if (action_check_entry)
+	{
+		if (action_check_entry.action_name.c_str() == temp_str)
+		{
+			SetDlgItemInt(IDC_EDIT_INTERVAL_TIME,action_check_entry[cur_sel].);
+		}
+		else
+		{
+			AfxMessageBox("选择和实际不一致");
+		}
+		
+	}
 	
 
 	// TODO: Add your control notification handler code here
@@ -103,5 +119,37 @@ void DlgActionCheck::OnBnClickedBtnDown()
 
 void DlgActionCheck::OnBnClickedBtnUse()
 {
+	CString str_entry;
+	_list_frame_source.GetText(_list_frame_source.GetCurSel(), str_entry);
+	std::string str_temp = str_entry;
+	frame_check* entry_temp = g_frameStorage.get_frame_check(str_temp.c_str());
+	if (entry_temp == NULL)
+	{
+		AfxMessageBox("没有正确的帧");
+	}
+	else
+	{
+		_lits_actions.GetText(_lits_actions.GetCurSel(), str_entry);
+		actionCheck* entry_action = g_actionCheckStorage.get_action(str_entry);
+		if (entry_action == NULL)
+		{
+			AfxMessageBox("没有正确的动作");
+		}
+		else
+		{
+			frameCheck temp_check;
+			CHECKDEGREES::iterator it = entry_temp->check_degrees.begin();
+			for (; it != entry_temp->check_degrees.end(); ++ it)
+			{
+				temp_check.check_degrees.push_back(it->second);
+			}
+			temp_check.check_name = entry_temp->frame_name;
+			temp_check.duration_time = 100;
+			temp_check.interval_time = 100;
+			entry_action->check_frames.push_back(temp_check);
+			_list_action_frames.AddString(temp_check.check_name.c_str());
+		}
+	}
+
 	// TODO: Add your control notification handler code here
 }

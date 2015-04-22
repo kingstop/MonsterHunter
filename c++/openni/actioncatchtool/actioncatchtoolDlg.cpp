@@ -488,7 +488,8 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	_page_view_action->MoveWindow(&temp_rect);
 	g_tab_view_type = tab_view_catch;
 	table_update();
-
+	g_frameCatch.load();
+	g_frameStorage.load();
 	//_tab_status.InsertItem();
 	// Add "About..." menu item to system menu.
 

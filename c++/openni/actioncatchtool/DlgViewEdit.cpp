@@ -31,7 +31,7 @@ BOOL DlgViewEdit::OnInitDialog()
 	CDialogEx::OnInitDialog();	
 	resetCombox();
 	SetDlgItemInt(IDC_EDIT_DEGREE, 0);
-	g_frameStorage.load();
+
 	return TRUE;
 }
 
