@@ -17,7 +17,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	
+	void OnLoadActionFrames(FRAMECHECKS& entry);
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -30,4 +30,5 @@ public:
 	afx_msg void OnBnClickedBtnUp();
 	afx_msg void OnBnClickedBtnDown();
 	afx_msg void OnBnClickedBtnUse();
+	afx_msg void OnBnClickedBtnSave();
 };

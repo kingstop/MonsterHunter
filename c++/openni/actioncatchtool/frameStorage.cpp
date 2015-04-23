@@ -101,13 +101,13 @@ void frameStorage::save()
 				current += size_temp;
 				fseek(fp,current,SEEK_SET);
 				size_temp = sizeof(temp_check->right_temp);
-				fread(&(temp_check->right_temp), size_temp, 1, fp);
+				fwrite(&(temp_check->right_temp), size_temp, 1, fp);
 
 
 				current += size_temp;
 				fseek(fp,current,SEEK_SET);
 				size_temp = sizeof(temp_check->bottom_temp);
-				fread(&(temp_check->bottom_temp), size_temp, 1, fp);
+				fwrite(&(temp_check->bottom_temp), size_temp, 1, fp);
 
 				current += size_temp;
 				fseek(fp, current, SEEK_SET);

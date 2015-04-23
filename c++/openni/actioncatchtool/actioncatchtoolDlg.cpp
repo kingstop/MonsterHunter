@@ -826,19 +826,20 @@ void CactioncatchtoolDlg::RenderScene() {
 	{
 	case tab_view_catch:
 		{
-			if (_opennni_create_successful)
+
+
+			switch(g_catch_view_type)
 			{
-			xn::SceneMetaData sceneMD;
-			xn::DepthMetaData depthMD;
-			g_DepthGenerator.GetMetaData(depthMD);
-
-			GLdouble right_temp = depthMD.XRes();
-			GLdouble bottom_temp = depthMD.YRes();
-				switch(g_catch_view_type)
+			case catch_view_catch:
+				if (_opennni_create_successful)
 				{
-				case catch_view_catch:
+					xn::SceneMetaData sceneMD;
+					xn::DepthMetaData depthMD;
+					g_DepthGenerator.GetMetaData(depthMD);
 
-			#ifndef USE_GLES
+					GLdouble right_temp = depthMD.XRes();
+					GLdouble bottom_temp = depthMD.YRes();
+								#ifndef USE_GLES
 					glOrtho(0, right_temp, bottom_temp, 0, -1.0, 1.0);
 			#else
 					glOrthof(0, right_temp, bottom_temp, 0, -1.0, 1.0);
@@ -854,26 +855,30 @@ void CactioncatchtoolDlg::RenderScene() {
 					g_UserGenerator.GetUserPixels(0, sceneMD);
 					DrawDepthMap(depthMD, sceneMD);
 					glEnd();
-					/*		glBegin(GL_LINES);
-					glVertex3i(29.161575,62.882469, 0.0);
-					glVertex3i(19.128357, 60.578716, 0.0);
-					glEnd()*/;
-					break;
-				case catch_view_select:
-					framedata* temp = g_frameCatch.get_cur_select();
-					if (temp)
-					{
-			#ifndef USE_GLES
-						glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
-			#else
-						glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
-			#endif
-						RenderPerson(temp->frame_point);
 
-					}
-					break;
 				}
+
+
+				/*		glBegin(GL_LINES);
+				glVertex3i(29.161575,62.882469, 0.0);
+				glVertex3i(19.128357, 60.578716, 0.0);
+				glEnd()*/;
+				break;
+			case catch_view_select:
+				framedata* temp = g_frameCatch.get_cur_select();
+				if (temp)
+				{
+		#ifndef USE_GLES
+					glOrtho(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+		#else
+					glOrthof(0, temp->right_temp, temp->bottom_temp, 0, -1.0, 1.0);
+		#endif
+					RenderPerson(temp->frame_point);
+
+				}
+				break;
 			}
+			
 
 		}
 		break;
@@ -883,7 +888,7 @@ void CactioncatchtoolDlg::RenderScene() {
 			frame_check* temp_check_frame = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
 			if (temp_check_frame)
 			{
-				framedata* temp_check_frame = g_frameCatch.get_cur_select();
+				//framedata* temp_check_frame = g_frameCatch.get_cur_select();
 				if (temp_check_frame)
 				{
 #ifndef USE_GLES
