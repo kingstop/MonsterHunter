@@ -33,6 +33,7 @@ public:
 	bool add_action(const char* szname);
 	actionCheck* get_action(const char* szname);
 	void load();
+	void save();
 	std::string cur_select;
 	std::string cur_select_edit;
 protected:

@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(DlgActionCheck, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_DOWN, &DlgActionCheck::OnBnClickedBtnDown)
 	ON_BN_CLICKED(IDC_BTN_USE, &DlgActionCheck::OnBnClickedBtnUse)
 	ON_BN_CLICKED(IDC_BTN_SAVE, &DlgActionCheck::OnBnClickedBtnSave)
+	ON_LBN_SELCHANGE(IDC_LIST_FRAME_CHECKS, &DlgActionCheck::OnLbnSelchangeListFrameChecks)
 END_MESSAGE_MAP()
 
 
@@ -169,7 +170,7 @@ void DlgActionCheck::OnBnClickedBtnDown()
 			if (action_check_entry->action_name.c_str() == temp_action_name 
 				&& action_check_entry->check_frames[cur_sel].check_name.c_str() == temp_str)
 			{
-				int temp_swap = cur_sel - 1;
+				int temp_swap = cur_sel + 1;
 				frameCheck entry_swap = action_check_entry->check_frames[temp_swap];
 				action_check_entry->check_frames[temp_swap] = action_check_entry->check_frames[cur_sel];
 				action_check_entry->check_frames[cur_sel] =  entry_swap;
@@ -231,6 +232,13 @@ void DlgActionCheck::OnBnClickedBtnUse()
 
 
 void DlgActionCheck::OnBnClickedBtnSave()
+{
+	g_actionCheckStorage.save();
+	// TODO: Add your control notification handler code here
+}
+
+
+void DlgActionCheck::OnLbnSelchangeListFrameChecks()
 {
 	// TODO: Add your control notification handler code here
 }

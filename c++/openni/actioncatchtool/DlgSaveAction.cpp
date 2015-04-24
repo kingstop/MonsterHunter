@@ -61,3 +61,13 @@ BOOL  DlgSaveAction::OnInitDialog()
 	::SetWindowPos(m_hWnd, HWND_TOPMOST, rtClient.left, rtClient.top, rtClient.Width(), rtClient.Height(), SWP_SHOWWINDOW); 
 	return TRUE;
 }
+BOOL DlgSaveAction::PreTranslateMessage(MSG* pMsg)
+{
+	if(pMsg->message==WM_KEYDOWN  &&  pMsg->wParam==VK_ESCAPE)    
+	{    
+		return TRUE;
+		//也会去调用OnOK函数，而OnOK什么也不做，这样ESC也被屏蔽  
+	}    
+
+	return   CDialogEx::PreTranslateMessage(pMsg);  
+}

@@ -31,4 +31,5 @@ public:
 	afx_msg void OnBnClickedBtnDown();
 	afx_msg void OnBnClickedBtnUse();
 	afx_msg void OnBnClickedBtnSave();
+	afx_msg void OnLbnSelchangeListFrameChecks();
 };

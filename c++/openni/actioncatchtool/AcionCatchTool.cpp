@@ -31,7 +31,15 @@ void AcionCatchTool::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(AcionCatchTool, CDialogEx)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_MAIN, &AcionCatchTool::OnTcnSelchangeTabMain)
 END_MESSAGE_MAP()
 
 
 // AcionCatchTool message handlers
+
+
+void AcionCatchTool::OnTcnSelchangeTabMain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+}

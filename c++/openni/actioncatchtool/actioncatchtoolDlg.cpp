@@ -490,6 +490,7 @@ BOOL CactioncatchtoolDlg::OnInitDialog()
 	table_update();
 	g_frameCatch.load();
 	g_frameStorage.load();
+	g_actionCheckStorage.load();
 	//_tab_status.InsertItem();
 	// Add "About..." menu item to system menu.
 
@@ -885,22 +886,57 @@ void CactioncatchtoolDlg::RenderScene() {
 
 	case tab_view_edit:
 		{
-			frame_check* temp_check_frame = g_frameStorage.get_frame_check(g_frameStorage._cur_sel.c_str());
-			if (temp_check_frame)
+			CString temp_entry;
+			int cur_sel = _page_view_edit->_edit_frames.GetCurSel();
+			if (cur_sel >= 0)
 			{
-				//framedata* temp_check_frame = g_frameCatch.get_cur_select();
+				_page_view_edit->_edit_frames.GetText(cur_sel, temp_entry);
+				frame_check* temp_check_frame = g_frameStorage.get_frame_check(temp_entry);
 				if (temp_check_frame)
 				{
+					//framedata* temp_check_frame = g_frameCatch.get_cur_select();
+					if (temp_check_frame)
+					{
 #ifndef USE_GLES
-					glOrtho(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+						glOrtho(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
 #else
-					glOrthof(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+						glOrthof(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
 #endif
-					RenderPerson(temp_check_frame->frame_point);
+						RenderPerson(temp_check_frame->frame_point);
 
+					}
+					//temp_check_frame
 				}
-				//temp_check_frame
 			}
+
+		}
+		break;
+	case  tab_view_action:
+		{
+			CString temp_entry;
+			int cur_sel = _page_view_action->_list_frame_source.GetCurSel();
+			if (cur_sel >= 0)
+			{
+				_page_view_action->_list_frame_source.GetText(cur_sel, temp_entry);
+				frame_check* temp_check_frame = g_frameStorage.get_frame_check(temp_entry);
+				if (temp_check_frame)
+				{
+					//framedata* temp_check_frame = g_frameCatch.get_cur_select();
+					if (temp_check_frame)
+					{
+#ifndef USE_GLES
+						glOrtho(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+#else
+						glOrthof(0, temp_check_frame->right_temp, temp_check_frame->bottom_temp, 0, -1.0, 1.0);
+#endif
+						RenderPerson(temp_check_frame->frame_point);
+
+					}
+					//temp_check_frame
+				}
+			}
+
+
 		}
 		break;
 	}
