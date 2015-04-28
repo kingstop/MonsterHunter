@@ -6,8 +6,10 @@
 *.idb
 *.bsc
 *.html
+*.bin
 
-
+metadata/
+Temp/
 
 #################
 ## Eclipse

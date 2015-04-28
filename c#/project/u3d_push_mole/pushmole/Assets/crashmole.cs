@@ -84,9 +84,73 @@ public class crash_manager
         int temp_count = _crash_moles_list.Count;
         for (int i = 0; i < temp_count; i ++)
         {
+            crash_mole mole_entry = (crash_mole)_crash_moles_list[i];
+            if (can_fall(mole_entry))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public bool move(crash_mole mole_entry, int move_x, int move_z)
+    {
+        int count_temp = mole_entry._crash_objs.Count;
+        for (int i = 0; i < count_temp; i++)
+        {
+            crash_obj obj_entry = (crash_obj)mole_entry._crash_objs[i];
+            int target_x = obj_entry._pos._x + move_x;
+            int target_z = obj_entry._pos._z + move_z;
+            if (target_x < 0 || target_z < 0 || target_x >= (int)crash_define.max_x || target_z >= (int)crash_define.max_z)
+            {
+                return false;
+            }
+            if (get_crash_mole_addr(obj_entry._pos._x, obj_entry._pos._z, obj_entry._pos._y - 1)._crash_mole != null)
+            {
+                return false;
+            }
         }
         return true;
+    }
+
+    public bool move_left(crash_mole mole_entry)
+    {
+        if (move(mole_entry, -1, 0))
+        {
+            return true;
+        }
+        return false;
+
+    }
+
+    public bool move_right(crash_mole mole_entry)
+    {
+
+        if (move(mole_entry, 1, 0))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool move_back(crash_mole mole_entry)
+    {
+
+        if (move(mole_entry, 0, 1))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool move_front(crash_mole mole_entry)
+    {
+
+        if (move(mole_entry, 0, -1))
+        {
+            return true;
+        }
+        return false;
     }
 
     public bool can_fall(crash_mole mole_entry)
