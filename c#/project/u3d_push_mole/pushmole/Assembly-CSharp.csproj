@@ -46,10 +46,13 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\color_button_click.cs" />
      <Compile Include="Assets\crash_mole_grid_manager.cs" />
      <Compile Include="Assets\crashmole.cs" />
      <Compile Include="Assets\crashmolegrid.cs" />
+     <Compile Include="Assets\global_instance.cs" />
      <Compile Include="Assets\ngui_edit_manager.cs" />
+     <Compile Include="Assets\on_scrollbar_change.cs" />
      <None Include="Assets\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />
      <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BlendOneOne.shader" />
      <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\NoiseEffectShaderRGB.shader" />

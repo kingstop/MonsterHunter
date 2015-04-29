@@ -30,8 +30,6 @@ public class crash_obj
     }
    
     public crash_pos _pos = new crash_pos();
-
-    crash_manager _manager;
 }
 
 
@@ -41,14 +39,33 @@ public class crash_mole
     {
 
     }
-    void add_crash_obj(crash_obj obj_entry)
+    public bool add_crash_obj(crash_obj obj_entry)
     {
+        foreach (crash_obj enry in _crash_objs)
+        {
+            if(obj_entry._pos._x == enry._pos._x &&
+                obj_entry._pos._y == enry._pos._y &&
+                obj_entry._pos._z == enry._pos._z)
+            {
+                return false;
+            }
+        }
+        if (_crash_manager.get_crash_obj_addr(obj_entry._pos)._crash_obj != null)
+        {
+            return false;
+        }
+
+        add_crash_obj(obj_entry);
         _crash_objs.Add(obj_entry);
+        return true;
     }
 
     public ArrayList _crash_objs = new ArrayList();
 
-
+    public crash_manager _crash_manager;
+    public float _r;
+    public float _g;
+    public float _b;
 }
 
 
@@ -60,6 +77,17 @@ public class crash_obj_addr
 public class crash_mole_addr
 {
     public crash_mole _crash_mole = null;
+}
+
+public enum dir_move
+{
+    left,
+    right,
+    back,
+    front,
+    down,
+    up,
+
 }
 
 enum crash_define{
@@ -74,9 +102,89 @@ public class crash_manager
     crash_obj_addr[, ,] _crash_objs = new crash_obj_addr[(int)crash_define.max_x, (int)crash_define.max_z ,(int)crash_define.max_y];
     crash_mole_addr[, ,] _crash_moles = new crash_mole_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     public ArrayList _crash_moles_list = new ArrayList();
+    public ArrayList _move_mole_list = new ArrayList();
     public crash_manager()
     {
         
+    }
+
+    public crash_obj create_crash_obj(int x, int y)
+    {
+        crash_obj obj = new crash_obj();
+        obj._pos._x = x;
+        obj._pos._y = y;
+        obj._pos._z = 9;
+        //add_crash_obj(obj);
+        return obj;
+    }
+
+    public crash_mole create_crash_mole()
+    {
+        crash_mole mole_entry = new crash_mole();
+        mole_entry._crash_manager = this;
+        return mole_entry;
+    }
+
+
+    public bool move(crash_mole mole, dir_move dir)
+    {
+        int length = _move_mole_list.Count;
+        for (int i = 0; i < length; i++)
+        {
+            if (mole == (crash_mole)_move_mole_list[i])
+            {
+                return true;
+            }
+            
+        }
+
+        foreach (crash_obj entry in mole._crash_objs)
+        {
+            switch (dir)
+            {
+                case dir_move.left:
+                    {
+
+                    }
+                    break;
+                case dir_move.right:
+                    {
+
+                    }
+                    break;
+                case dir_move.back:
+                    {
+
+                    }
+                    break;
+                case dir_move.front:
+                    {
+
+                    }
+                    break;
+                case dir_move.down:
+                    {
+
+                    }
+                    break;
+                case dir_move.up:
+                    {
+
+                    }
+                    break;
+            }
+        }
+
+
+    }
+
+    public bool move_left(crash_mole mole)
+    {
+        if (can_move_left(mole))
+        {
+
+        }
+        return true;
     }
 
     public bool can_fall()
@@ -93,7 +201,7 @@ public class crash_manager
         return false;
     }
 
-    public bool move(crash_mole mole_entry, int move_x, int move_z)
+    public bool can_move(crash_mole mole_entry, int move_x, int move_z)
     {
         int count_temp = mole_entry._crash_objs.Count;
         for (int i = 0; i < count_temp; i++)
@@ -113,9 +221,9 @@ public class crash_manager
         return true;
     }
 
-    public bool move_left(crash_mole mole_entry)
+    public bool can_move_left(crash_mole mole_entry)
     {
-        if (move(mole_entry, -1, 0))
+        if (can_move(mole_entry, -1, 0))
         {
             return true;
         }
@@ -123,30 +231,30 @@ public class crash_manager
 
     }
 
-    public bool move_right(crash_mole mole_entry)
+    public bool can_move_right(crash_mole mole_entry)
     {
 
-        if (move(mole_entry, 1, 0))
+        if (can_move(mole_entry, 1, 0))
         {
             return true;
         }
         return false;
     }
 
-    public bool move_back(crash_mole mole_entry)
+    public bool can_move_back(crash_mole mole_entry)
     {
 
-        if (move(mole_entry, 0, 1))
+        if (can_move(mole_entry, 0, 1))
         {
             return true;
         }
         return false;
     }
 
-    public bool move_front(crash_mole mole_entry)
+    public bool can_move_front(crash_mole mole_entry)
     {
 
-        if (move(mole_entry, 0, -1))
+        if (can_move(mole_entry, 0, -1))
         {
             return true;
         }
@@ -215,21 +323,18 @@ public class crash_manager
 
     public bool add_crash_mole(crash_mole obj_temp)
     {
-        if (isEmpty(obj_temp) == true)
+        int count_temp = obj_temp._crash_objs.Count;
+        for (int i = 0; i < count_temp; i++)
         {
-            int count_temp = obj_temp._crash_objs.Count;
-            for (int i = 0; i < count_temp; i++)
-            {
-                crash_pos pos = ((crash_obj)obj_temp._crash_objs[i])._pos;
+            crash_pos pos = ((crash_obj)obj_temp._crash_objs[i])._pos;
+            //add_crash_obj((crash_obj)obj_temp._crash_objs[i]);
+            _crash_moles[pos._x, pos._z, pos._y]._crash_mole = obj_temp;
 
-                _crash_moles[pos._x, pos._z, pos._y]._crash_mole = obj_temp;
-
-            }
-
-            _crash_moles_list.Add(obj_temp);
-            return true;
         }
-        return false;
+
+        _crash_moles_list.Add(obj_temp);
+        return true;
+       
     }
 
     private bool isEmpty(crash_mole obj_temp)
