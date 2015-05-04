@@ -150,6 +150,18 @@ public class crash_manager
         
     }
 
+    public void create_map()
+    {
+        for (int x = 0; x < (int)crash_define.max_x; x++)
+        {
+
+            for (int z = 0; z < (int)crash_define.max_z; z++)
+            {
+                for(int y = 0; y < (int)crash_define.max_y; )
+            }
+        }
+    }
+
     public crash_obj create_crash_obj(int x, int y)
     {
         crash_obj obj = new crash_obj();
