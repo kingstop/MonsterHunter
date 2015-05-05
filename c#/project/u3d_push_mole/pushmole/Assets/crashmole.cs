@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+
 public enum dir_move
 {
     left,
@@ -64,14 +67,14 @@ public class crash_obj
         _pos._x = 0;
         _pos._y = 0;
         _pos._z = 0;
-        _target_pos = _pos;
+        _last_pos = _pos;
     }
     public crash_obj(int x, int y, int z)
     {
         _pos._x = x;
         _pos._y = y;
         _pos._z = z;
-        _target_pos = _pos;
+        _last_pos = _pos;
     }
 
     public void on_remove()
@@ -80,7 +83,10 @@ public class crash_obj
     }
    
     public crash_pos _pos = new crash_pos();
-    public crash_pos _target_pos = new crash_pos();
+    public crash_pos _last_pos = new crash_pos();
+    public crashmolegrid _grid;
+    public crash_mole _crash_mole;
+
 }
 
 
@@ -106,7 +112,9 @@ public class crash_mole
             return false;
         }
 
-        add_crash_obj(obj_entry);
+       // add_crash_obj(obj_entry);
+        obj_entry._crash_mole = this;
+
         _crash_objs.Add(obj_entry);
         return true;
     }
@@ -114,9 +122,7 @@ public class crash_mole
     public ArrayList _crash_objs = new ArrayList();
 
     public crash_manager _crash_manager;
-    public float _r;
-    public float _g;
-    public float _b;
+    public int _color_group;
 }
 
 
@@ -139,15 +145,101 @@ enum crash_define{
 }
 public class crash_manager
 {
+    public Dictionary<int, Color> _group_colors = new Dictionary<int, Color>();
     bool[, ,] _can_move_locks = new bool[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     crash_obj_addr[, ,] _crash_objs = new crash_obj_addr[(int)crash_define.max_x, (int)crash_define.max_z ,(int)crash_define.max_y];
     crash_mole_addr[, ,] _crash_moles = new crash_mole_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     public ArrayList _crash_moles_list = new ArrayList();
     public ArrayList _move_mole_list = new ArrayList();
-    public int _check_fall_y;
+    public float _grid_distance;
+    public float _current_move_distance;
+    public float _move_animation_distance;
+    public bool _need_play_animation;
+    dir_move _last_move_dir;
+    GameObject _source_crash_mole_obj;
+    public void add_color(int group, Color temp_color)
+    {
+        if (_group_colors.ContainsKey(group) == false)
+        {
+            _group_colors.Add(group, temp_color);
+        }
+        
+    }
     public crash_manager()
     {
-        
+        _grid_distance = (float)1.022;
+        _source_crash_mole_obj = _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
+        _need_play_animation = false;
+        _move_animation_distance = (float)0.05;
+    }
+
+    public void update_move_animation()
+    {
+        if (_need_play_animation)
+        {
+            bool last_move = false;
+            float move_distance = _current_move_distance + _move_animation_distance;
+            if (move_distance >= _grid_distance)
+            {
+                last_move = true;
+                _current_move_distance = _grid_distance;
+            }
+            int temp_count = _move_mole_list.Count;
+            for (int j = 0; j < temp_count; j++)
+            {
+                crash_mole mole = (crash_mole)_crash_moles_list[j];
+                int crash_obj_count = mole._crash_objs.Count;
+                for (int i = 0; i < crash_obj_count; i++)
+                {
+                    crash_obj obj = (crash_obj)mole._crash_objs[i];
+                    float x_temp = obj._last_pos._x * _grid_distance;
+                    float z_temp = obj._last_pos._z * _grid_distance + 204;
+                    float y_temp = obj._last_pos._y * _grid_distance;
+                    switch (_last_move_dir)
+                    {
+                        case dir_move.back:
+                            {
+                                z_temp += _current_move_distance;
+                            }
+                            break;
+                        case dir_move.front:
+                            {
+                                z_temp -= _current_move_distance;
+                            }
+                            break;
+                        case dir_move.left:
+                            {
+                                x_temp -= _current_move_distance;
+                            }
+                            break;
+                        case dir_move.right:
+                            {
+                                x_temp += _current_move_distance;
+                            }
+                            break;
+                        case dir_move.down:
+                            {
+                                y_temp -= _current_move_distance;
+                            }
+                            break;
+                        case dir_move.up:
+                            {
+                                y_temp += _current_move_distance;
+                            }
+                            break;
+                    }
+
+                }
+
+
+
+            }
+            if (last_move)
+            {
+                _need_play_animation = false;
+            }
+        }
+
     }
 
     public void create_map()
@@ -157,7 +249,20 @@ public class crash_manager
 
             for (int z = 0; z < (int)crash_define.max_z; z++)
             {
-                for(int y = 0; y < (int)crash_define.max_y; )
+                for (int y = 0; y < (int)crash_define.max_y; y++)
+                {
+                    if (_crash_objs[x, z, y]._crash_obj != null)
+                    {
+                        GameObject obj_temp = Object.Instantiate<GameObject>(_source_crash_mole_obj);
+                        _crash_objs[x, z, y]._crash_obj._grid = obj_temp.GetComponent<crashmolegrid>();
+                        _crash_objs[x, z, y]._crash_obj._grid.set_color(_group_colors[_crash_objs[x, z, y]._crash_obj._crash_mole._color_group]);
+                        float x_temp = x * _grid_distance;
+                        float z_temp = z * _grid_distance + 204;
+                        float y_temp = y * _grid_distance;
+                        _crash_objs[x, z, y]._crash_obj._grid.set_position(x_temp, z_temp, y_temp);
+                    }
+                    
+                }
             }
         }
     }
@@ -192,9 +297,31 @@ public class crash_manager
         }
         return true;
     }
+
+    public void clear_block()
+    {
+
+        for (int x = 0; x < (int)crash_define.max_x; x++)
+        {
+
+            for (int z = 0; z < (int)crash_define.max_z; z++)
+            {
+                for (int y = 0; y < (int)crash_define.max_y; y++)
+                {
+                    _can_move_locks[x, z, y] = false;
+                }
+            }
+        }
+    }
+
+    public void set_block(int x, int z, int y)
+    {
+        _can_move_locks[x, z, y] = true;
+    }
     public bool move(int x, int y, int z, dir_move dir)
     {
-        _check_fall_y = (int)crash_define.max_y;
+
+        clear_block();
         _move_mole_list.Clear();
 
         crash_mole entry = get_crash_mole_addr(x, z, y)._crash_mole;
@@ -206,9 +333,22 @@ public class crash_manager
         bool b_temp = move(entry, dir);
         if (b_temp)
         {
+            _last_move_dir = dir;
             int temp_count = _move_mole_list.Count;
             for (int j = 0; j < temp_count; j++)
             {
+                crash_mole mole = (crash_mole)_crash_moles_list[j];
+                int crash_obj_count = mole._crash_objs.Count;
+                for (int i = 0; i < crash_obj_count; i++)
+                {
+                    crash_obj obj = (crash_obj)mole._crash_objs[i];
+                    set_block(obj._pos._x, obj._pos._z, obj._pos._y);
+                    obj._last_pos = obj._pos;
+                    obj._pos.move(dir);
+
+                }
+
+                
 
             }
 
@@ -223,7 +363,8 @@ public class crash_manager
         }
         else
         {
-            _check_fall_y = (int)crash_define.max_y;
+            
+            _move_mole_list.Clear();
         }
 
         return b_temp;
@@ -301,10 +442,7 @@ public class crash_manager
                     {
                         if (mole == (crash_mole)_move_mole_list[i])
                         {
-                            if (_check_fall_y > min_move_y)
-                            {
-                                _check_fall_y = min_move_y;
-                            }
+
                             return true;
                         }
 
@@ -324,10 +462,7 @@ public class crash_manager
             }
             
         }
-        if (_check_fall_y > min_move_y)
-        {
-            _check_fall_y = min_move_y;
-        }
+
         return true;
     }
 

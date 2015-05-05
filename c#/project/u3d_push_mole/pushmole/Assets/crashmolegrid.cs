@@ -47,6 +47,12 @@ public class crashmolegrid : MonoBehaviour
       
     }
 
+    public void set_position(float x, float y, float z)
+    {
+        Vector3 new_position = new Vector3(x, y, z);
+        this.gameObject.transform.position = new_position;
+    }
+
 
     void OnMouseDown()
     {

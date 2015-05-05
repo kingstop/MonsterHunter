@@ -5,7 +5,21 @@ using UnityEngine;
 public class crash_mole_grid_manager : MonoBehaviour {
     GameObject _source_crash_mole_obj;
     crashmolegrid[,] _crashmolegrids = new crashmolegrid[18, 60];
+    GameObject
     //prush_mo
+
+    void crash_mole_grid()
+    {
+        for (int i = 0; i < 18; i++)
+        {
+            for (int j = 0; j < 60; j++)
+            {
+                Destroy()
+                _crashmolegrids[i, j].
+            }
+
+        }
+    }
 
 	// Use this for initialization
 	void Start () {
@@ -18,6 +32,7 @@ public class crash_mole_grid_manager : MonoBehaviour {
             {
              
                GameObject obj_temp = Instantiate<GameObject>(_source_crash_mole_obj);
+               
                obj_temp.name = i.ToString() + "-" + j.ToString();
                _crashmolegrids[i, j] = obj_temp.GetComponent<crashmolegrid>();
                float x = (float)i + (float)(i * 0.022);
@@ -47,7 +62,7 @@ public class crash_mole_grid_manager : MonoBehaviour {
             grid_temp.set_color(global_instance.Instance._current_color);
             grid_temp.set_group(global_instance.Instance._current_group);
             print(hitt.transform.gameObject.name);
-
+            global_instance.Instance._crash_manager.add_color(global_instance.Instance._current_group, global_instance.Instance._current_color);
             print(hitt.point);//鼠标点击的坐标
 
         }
@@ -92,11 +107,9 @@ public class crash_mole_grid_manager : MonoBehaviour {
                     }
                     else
                     {
-                        crash_mole mole_entry = global_instance.Instance._crash_manager.create_crash_mole();
-                        mole_entry._r = color.r;
-                        mole_entry._g = color.g;
-                        mole_entry._b = color.b;                       
+                        crash_mole mole_entry = global_instance.Instance._crash_manager.create_crash_mole();                 
                         mole_entry.add_crash_obj(obj);
+                        mole_entry._color_group = group;
                         global_instance.Instance._crash_manager.add_crash_mole(mole_entry);
                     }
 
