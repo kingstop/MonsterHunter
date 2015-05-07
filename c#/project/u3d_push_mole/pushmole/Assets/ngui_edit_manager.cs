@@ -5,7 +5,10 @@ using System.Collections;
 public class ngui_edit_manager : MonoBehaviour {
     public Button[] _Buttons_sliced;
     public Button[] _Buttons_simple;
+    public Button[] _Buttons_sliced_game_type;
+    public Button[] _Buttons_simple_game_type;
     public Color _current_color;
+
 	// Use this for initialization
 	void Start () {
         //Debug.Log("ngui_edit_manager start[" + _Buttons_simple.Length.ToString()  + ")
@@ -23,14 +26,11 @@ public class ngui_edit_manager : MonoBehaviour {
             {
                 entry.gameObject.SetActive(!b_set);
             }
-
             _Buttons_simple[0].gameObject.SetActive(!b_set);
-            _Buttons_sliced[0].gameObject.SetActive(b_set);
-            
+            _Buttons_sliced[0].gameObject.SetActive(b_set);            
             global_instance.Instance._current_color = _Buttons_simple[0].GetComponent<Image>().color;
-
         }
-        
+        update_game_type(game_type.edit);
 	}
 	
 	// Update is called once per frame
@@ -38,25 +38,36 @@ public class ngui_edit_manager : MonoBehaviour {
 	
 	}
 
-    //public void on_horizontal_Scrollbar_change(GameObject obj)
-    //{
-    //    Scrollbar bar_temp = obj.GetComponent<Scrollbar>();
-    //    //float value = bar_temp.value;
-    //}
+    public void update_game_type(game_type type)
+    {
+        bool set_temp = false;
+        int length = _Buttons_sliced_game_type.Length;
+        for(int i = 0 ; i < length; i ++)
+        {
+            _Buttons_sliced_game_type[i].gameObject.SetActive(!set_temp);
+            _Buttons_simple_game_type[i].gameObject.SetActive(set_temp);            
+        }
 
-    //public void on_vertical_Scrollbar_change(GameObject obj)
-    //{
-    //    Scrollbar bar_temp = obj.GetComponent<Scrollbar>();
-    //    float value = bar_temp.value;
-    //    float min_h = (float)4.7;
-    //    float max_h = (float)55.6;
-    //    float temp_distance = (max_h - min_h) * value;
-    //    float target_h = temp_distance + min_h;
-    //    Vector3 pos_new = new Vector3(Camera.main.transform.position.x, target_h, Camera.main.transform.position.z);
-    //    Camera.main.transform.position = pos_new;
+        _Buttons_sliced_game_type[(int)type].gameObject.SetActive(set_temp);
+        _Buttons_simple_game_type[(int)type].gameObject.SetActive(!set_temp);
 
-    //}
+        global_instance.Instance._crash_mole_grid_manager.update_game_type(type);
+    }
 
+    public void check_game_type_click(Button obj)
+    {
+        int length = _Buttons_sliced_game_type.Length;
+        for (int i = 0; i < length; i++)
+        {
+            if (_Buttons_sliced_game_type[i] == obj)
+            {
+                Debug.Log("check_game_type_click [" + obj.ToString() + "]");
+                update_game_type((game_type)i);
+                break;
+            }
+            
+        }
+    }
 
 
     public void message_on_button_click(Button obj)

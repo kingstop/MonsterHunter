@@ -5,24 +5,45 @@ using UnityEngine;
 public class crash_mole_grid_manager : MonoBehaviour {
     GameObject _source_crash_mole_obj;
     crashmolegrid[,] _crashmolegrids = new crashmolegrid[18, 60];
-    GameObject
+    ArrayList _objlist = new ArrayList();
     //prush_mo
-
-    void crash_mole_grid()
+    public void update_game_type(game_type type)
+    {
+        switch (type)
+        {
+            case game_type.edit:
+                {
+                    create_edit_crash_mole_grid();
+                }
+                break;
+            case game_type.game:
+                {
+                    clear_eadit_crash_mole_grid();
+                }
+                break;
+        }
+    }
+    public void clear_eadit_crash_mole_grid()
     {
         for (int i = 0; i < 18; i++)
         {
             for (int j = 0; j < 60; j++)
             {
-                Destroy()
-                _crashmolegrids[i, j].
+                _crashmolegrids[i, j] = null;                
             }
 
         }
+        int length = _objlist.Count;
+        for (int i = 0; i < length; i++)
+        {
+            GameObject entry_obj = (GameObject)_objlist[i];
+            Destroy(entry_obj);
+        }
+        _objlist.Clear();
     }
 
-	// Use this for initialization
-	void Start () {
+    public void create_edit_crash_mole_grid()
+    {
         Vector3 new_position = new Vector3((float)7.7, (float)4.7, (float)-10.6);
         Camera.main.transform.position = new_position;
         _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
@@ -30,22 +51,28 @@ public class crash_mole_grid_manager : MonoBehaviour {
         {
             for (int j = 0; j < 60; j++)
             {
-             
-               GameObject obj_temp = Instantiate<GameObject>(_source_crash_mole_obj);
-               
-               obj_temp.name = i.ToString() + "-" + j.ToString();
-               _crashmolegrids[i, j] = obj_temp.GetComponent<crashmolegrid>();
-               float x = (float)i + (float)(i * 0.022);
-               float y = (float)j + (float)(j * 0.022);
 
-               _crashmolegrids[i, j].set_position(x , y);
-               _crashmolegrids[i, j].set_color(1, 1, 1, 1);
-               _crashmolegrids[i, j].set_group(11);
+                GameObject obj_temp = Instantiate<GameObject>(_source_crash_mole_obj);
+                _objlist.Add(obj_temp);
+
+                obj_temp.name = i.ToString() + "-" + j.ToString();
+                _crashmolegrids[i, j] = obj_temp.GetComponent<crashmolegrid>();
+                float x = (float)i + (float)(i * 0.022);
+                float y = (float)j + (float)(j * 0.022);
+
+                _crashmolegrids[i, j].set_position(x, y);
+                _crashmolegrids[i, j].set_color(1, 1, 1, 1);
+                _crashmolegrids[i, j].set_group(11);
             }
-        }
+        }          
+    }
 
-            
+	// Use this for initialization
+	void Start () {
+        global_instance.Instance._crash_mole_grid_manager = this;
+        create_edit_crash_mole_grid();
 
+       
 	}
     void OnMouseDown()
     {

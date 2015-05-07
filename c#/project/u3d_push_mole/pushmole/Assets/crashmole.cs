@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+public enum game_type
+{
+    edit,
+    game,
+    max
+}
 
 
 public enum dir_move

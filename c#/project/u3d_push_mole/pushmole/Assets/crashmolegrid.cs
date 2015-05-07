@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class crashmolegrid : MonoBehaviour
 {
     public MeshRenderer current_mesh_render_;
