@@ -50,8 +50,12 @@ public class ngui_edit_manager : MonoBehaviour {
 
         _Buttons_sliced_game_type[(int)type].gameObject.SetActive(set_temp);
         _Buttons_simple_game_type[(int)type].gameObject.SetActive(!set_temp);
+        if (global_instance.Instance._crash_mole_grid_manager != null)
+        {
+            global_instance.Instance._crash_mole_grid_manager.update_game_type(type);
+        }
 
-        global_instance.Instance._crash_mole_grid_manager.update_game_type(type);
+        
     }
 
     public void check_game_type_click(Button obj)

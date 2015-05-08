@@ -113,6 +113,12 @@ public class crash_mole
                 return false;
             }
         }
+        crash_obj_addr obj_addr = _crash_manager.get_crash_obj_addr(obj_entry._pos);
+        if(obj_addr == null)
+        {
+            return false;
+        }
+
         if (_crash_manager.get_crash_obj_addr(obj_entry._pos)._crash_obj != null)
         {
             return false;
@@ -120,8 +126,10 @@ public class crash_mole
 
        // add_crash_obj(obj_entry);
         obj_entry._crash_mole = this;
-
+       
         _crash_objs.Add(obj_entry);
+        _crash_manager._crash_objs[obj_entry._pos._x, obj_entry._pos._z, obj_entry._pos._y]._crash_obj = obj_entry;
+        _crash_manager._crash_moles[obj_entry._pos._x, obj_entry._pos._z, obj_entry._pos._y]._crash_mole = this;
         return true;
     }
 
@@ -153,8 +161,8 @@ public class crash_manager
 {
     public Dictionary<int, Color> _group_colors = new Dictionary<int, Color>();
     bool[, ,] _can_move_locks = new bool[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
-    crash_obj_addr[, ,] _crash_objs = new crash_obj_addr[(int)crash_define.max_x, (int)crash_define.max_z ,(int)crash_define.max_y];
-    crash_mole_addr[, ,] _crash_moles = new crash_mole_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
+    public crash_obj_addr[, ,] _crash_objs = new crash_obj_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
+    public crash_mole_addr[, ,] _crash_moles = new crash_mole_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     public ArrayList _crash_moles_list = new ArrayList();
     public ArrayList _move_mole_list = new ArrayList();
     public float _grid_distance;
@@ -173,8 +181,19 @@ public class crash_manager
     }
     public crash_manager()
     {
-        _grid_distance = (float)1.022;
-        _source_crash_mole_obj = _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
+        for (int x = 0; x < (int)crash_define.max_x; x ++)
+        {
+            for(int y = 0; y < (int)crash_define.max_y; y ++)
+            {
+                for(int z = 0; z < (int)crash_define.max_z; z ++)
+                {
+                    _crash_objs[x, z, y] = new crash_obj_addr();
+                    _crash_moles[x, z, y] = new crash_mole_addr();
+                }
+            }
+        }
+            _grid_distance = (float)1.022;
+        _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
         _need_play_animation = false;
         _move_animation_distance = (float)0.05;
     }
@@ -509,14 +528,14 @@ public class crash_manager
 
     public bool add_crash_mole(crash_mole obj_temp)
     {
-        int count_temp = obj_temp._crash_objs.Count;
-        for (int i = 0; i < count_temp; i++)
-        {
-            crash_pos pos = ((crash_obj)obj_temp._crash_objs[i])._pos;
-            //add_crash_obj((crash_obj)obj_temp._crash_objs[i]);
-            _crash_moles[pos._x, pos._z, pos._y]._crash_mole = obj_temp;
+        //int count_temp = obj_temp._crash_objs.Count;
+        //for (int i = 0; i < count_temp; i++)
+        //{
+        //    crash_pos pos = ((crash_obj)obj_temp._crash_objs[i])._pos;
+        //    //add_crash_obj((crash_obj)obj_temp._crash_objs[i]);
+        //    _crash_moles[pos._x, pos._z, pos._y]._crash_mole = obj_temp;
 
-        }
+        //}
 
         _crash_moles_list.Add(obj_temp);
         return true;

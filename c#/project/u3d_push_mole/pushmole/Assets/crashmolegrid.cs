@@ -67,9 +67,9 @@ public class crashmolegrid : MonoBehaviour
         if (null != hitt.transform)
         {
             crashmolegrid grid_temp = hitt.transform.gameObject.GetComponent<crashmolegrid>();
-            grid_temp.set_color(global_instance.Instance._current_color);
+            grid_temp.set_color(global_instance.Instance._current_color);            
+            grid_temp.set_group(global_instance.Instance._current_group);
             print(hitt.transform.gameObject.name);
-
             print(hitt.point);//鼠标点击的坐标
 
         }
