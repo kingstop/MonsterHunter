@@ -68,6 +68,7 @@
     <Compile Include="Assets\crashmolegrid.cs" />
     <Compile Include="Assets\game_type_click.cs" />
     <Compile Include="Assets\global_instance.cs" />
+    <Compile Include="Assets\next_step_click.cs" />
     <Compile Include="Assets\ngui_edit_manager.cs" />
     <Compile Include="Assets\on_scrollbar_change.cs" />
   </ItemGroup>

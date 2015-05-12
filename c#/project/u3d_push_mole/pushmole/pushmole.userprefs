@@ -2,11 +2,19 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\crashmole.cs">
     <Files>
-      <File FileName="Assets\crashmole.cs" Line="1" Column="1" />
+      <File FileName="Assets\color_button_click.cs" Line="1" Column="1" />
+      <File FileName="Assets\crash_mole_grid_manager.cs" Line="1" Column="1" />
+      <File FileName="Assets\crashmole.cs" Line="554" Column="45" />
+      <File FileName="e:\github\MonsterHunter\c#\project\u3d_push_mole\pushmole\Assets\Editor\ImageEffects\AntialiasingEditor.cs" Line="44" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="E:\github\MonsterHunter\c#\project\u3d_push_mole\pushmole\Assets\crashmole.cs" line="538" />
+      <Breakpoint file="E:\github\MonsterHunter\c#\project\u3d_push_mole\pushmole\Assets\crashmole.cs" line="544" />
+      <Breakpoint file="E:\github\MonsterHunter\c#\project\u3d_push_mole\pushmole\Assets\crashmole.cs" line="557" />
+      <Breakpoint file="E:\github\MonsterHunter\c#\project\u3d_push_mole\pushmole\Assets\crashmole.cs" line="554" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

@@ -165,6 +165,7 @@ public class crash_mole_grid_manager : MonoBehaviour {
     }
 	// Update is called once per frame
 	void Update () {
+        global_instance.Instance._crash_manager.update_move_animation();
         //RaycastHit hitt = new RaycastHit();
         //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 

@@ -102,6 +102,7 @@ public class crash_mole
     {
 
     }
+
     public bool add_crash_obj(crash_obj obj_entry)
     {
         foreach (crash_obj enry in _crash_objs)
@@ -171,6 +172,7 @@ public class crash_manager
     public bool _need_play_animation;
     dir_move _last_move_dir;
     GameObject _source_crash_mole_obj;
+    public int _use_count = 0;
     public void add_color(int group, Color temp_color)
     {
         if (_group_colors.ContainsKey(group) == false)
@@ -209,17 +211,27 @@ public class crash_manager
                 last_move = true;
                 _current_move_distance = _grid_distance;
             }
+            else
+            {
+                _current_move_distance = move_distance;
+            }
             int temp_count = _move_mole_list.Count;
             for (int j = 0; j < temp_count; j++)
             {
-                crash_mole mole = (crash_mole)_crash_moles_list[j];
+                crash_mole mole = (crash_mole)_move_mole_list[j];
                 int crash_obj_count = mole._crash_objs.Count;
                 for (int i = 0; i < crash_obj_count; i++)
                 {
                     crash_obj obj = (crash_obj)mole._crash_objs[i];
                     float x_temp = obj._last_pos._x * _grid_distance;
-                    float z_temp = obj._last_pos._z * _grid_distance + 204;
+                    float z_temp = obj._last_pos._z * _grid_distance ;
                     float y_temp = obj._last_pos._y * _grid_distance;
+                    int n = 0;
+                    if (obj._last_pos._y - obj._pos._y >1)
+                    {
+                        n++;
+                    }
+                    
                     switch (_last_move_dir)
                     {
                         case dir_move.back:
@@ -253,7 +265,7 @@ public class crash_manager
                             }
                             break;
                     }
-
+                    obj._grid.set_position(x_temp, y_temp, z_temp);
                 }
 
 
@@ -261,6 +273,23 @@ public class crash_manager
             }
             if (last_move)
             {
+                temp_count = _move_mole_list.Count;
+                for (int j = 0; j < temp_count; j++)
+                {
+                    crash_mole mole = (crash_mole)_move_mole_list[j];
+                    int crash_obj_count = mole._crash_objs.Count;
+                    for (int i = 0; i < crash_obj_count; i++)
+                    {
+                        crash_obj obj = (crash_obj)mole._crash_objs[i];
+                        obj._last_pos = obj._pos;
+
+                    }
+
+
+
+                }
+
+                _current_move_distance = 0;
                 _need_play_animation = false;
             }
         }
@@ -282,9 +311,9 @@ public class crash_manager
                         _crash_objs[x, z, y]._crash_obj._grid = obj_temp.GetComponent<crashmolegrid>();
                         _crash_objs[x, z, y]._crash_obj._grid.set_color(_group_colors[_crash_objs[x, z, y]._crash_obj._crash_mole._color_group]);
                         float x_temp = x * _grid_distance;
-                        float z_temp = z * _grid_distance + 204;
+                        float z_temp = z * _grid_distance;
                         float y_temp = y * _grid_distance;
-                        _crash_objs[x, z, y]._crash_obj._grid.set_position(x_temp, z_temp, y_temp);
+                        _crash_objs[x, z, y]._crash_obj._grid.set_position(x_temp, y_temp, z_temp);
                     }
                     
                 }
@@ -368,8 +397,8 @@ public class crash_manager
                 {
                     crash_obj obj = (crash_obj)mole._crash_objs[i];
                     set_block(obj._pos._x, obj._pos._z, obj._pos._y);
-                    obj._last_pos = obj._pos;
-                    obj._pos.move(dir);
+                    //obj._last_pos = obj._pos;
+                    //obj._pos.move(dir);
 
                 }
 
@@ -398,55 +427,93 @@ public class crash_manager
 
     public bool need_fall_update()
     {
+        if(_need_play_animation == true)
+        {
+            return false;
+        }
+        _move_mole_list.Clear();
+        ArrayList enry_list = new ArrayList();
         int current_count = _crash_moles_list.Count;
-        crash_pos temp_pos = new crash_pos();
+        //crash_pos temp_pos = new crash_pos();
         bool can_fall_temp = true;
         for (int i = 0; i < current_count; i++)
         {
-            can_fall_temp = true;
-            crash_mole mole_entry = (crash_mole)_crash_moles_list[i];
-            int obj_count = mole_entry._crash_objs.Count;
-            for (int j = 0; j < obj_count; j++)
+            int move_count = enry_list.Count;
+            crash_mole cur_entry = (crash_mole)_crash_moles_list[i];
+            for(int j = 0; j < move_count; j ++)
             {
-
-                crash_obj obj_entry = (crash_obj)mole_entry._crash_objs[j];
-                temp_pos._x = obj_entry._pos._x;
-                temp_pos._y = obj_entry._pos._y - 1;
-                temp_pos._z = obj_entry._pos._z;
-                if (check_pos_valid(temp_pos))
+                crash_mole temp_entry = (crash_mole)enry_list[j];
+                if(temp_entry == cur_entry)
                 {
-                    if (get_crash_mole_addr(temp_pos)._crash_mole != null)
-                    {
-                        if (get_crash_mole_addr(temp_pos)._crash_mole == mole_entry)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            can_fall_temp = false;
-                            break;
-                        }
-                    }                                        
-                }
-                else
-                {
-                    can_fall_temp =  false;
-                    break;
-                }
-
-                if (can_fall_temp == false)
-                {
-                    break;
-                }
+                    continue;
+                }            
             }
+            _move_mole_list.Add(cur_entry);
+            if (move(cur_entry, dir_move.down) == true)
+            {
+                move_count = _move_mole_list.Count;
+                for(int j = 0; j < move_count; j ++)
+                {
+                    enry_list.Add(_move_mole_list[j]);
+                }
+                update_move_list(_move_mole_list, dir_move.down);
 
+            }
+            _move_mole_list.Clear();
 
         }
+
+        int cur_count = enry_list.Count;
+        if(cur_count > 0)
+        {
+            can_fall_temp = true;
+            _need_play_animation = true;
+            _last_move_dir = dir_move.down;
+            _move_mole_list.Clear();
+            for(int i = 0; i < cur_count; i ++)
+            {
+                _move_mole_list.Add(enry_list[i]);
+            }
+
+        }
+        
         return can_fall_temp;
+    }
+
+    public void update_move_list(ArrayList temp_list, dir_move dir)
+    {
+        int count_temp = temp_list.Count;
+        for (int i = 0; i < count_temp; i ++ )
+        {
+            crash_mole obj_mole = (crash_mole)temp_list[i];
+            int crash_objs_count = obj_mole._crash_objs.Count;
+            for(int j = 0; j < crash_objs_count; j ++)
+            {
+                crash_obj obj_obj = (crash_obj)obj_mole._crash_objs[j];
+                _crash_moles[obj_obj._pos._x, obj_obj._pos._z, obj_obj._pos._y]._crash_mole = null;
+                _crash_objs[obj_obj._pos._x, obj_obj._pos._z, obj_obj._pos._y]._crash_obj = null;                
+            }
+        }
+
+        
+        for (int i = 0; i < count_temp; i++)
+        {
+            crash_mole obj_mole = (crash_mole)temp_list[i];
+            int crash_objs_count = obj_mole._crash_objs.Count;
+            for (int j = 0; j < crash_objs_count; j++)
+            {
+                crash_obj obj_obj = (crash_obj)obj_mole._crash_objs[j];
+                obj_obj._last_pos = obj_obj._pos;
+                obj_obj._pos.move(dir);
+                _crash_moles[obj_obj._pos._x, obj_obj._pos._z, obj_obj._pos._y]._crash_mole = obj_obj._crash_mole;
+                _crash_objs[obj_obj._pos._x, obj_obj._pos._z, obj_obj._pos._y]._crash_obj = obj_obj;
+            }
+        }
     }
 
     protected bool move(crash_mole mole, dir_move dir)
     {
+        _use_count++;
         int min_move_y = (int)crash_define.max_y;
         foreach (crash_obj entry in mole._crash_objs)
         {
@@ -459,30 +526,51 @@ public class crash_manager
             pos_temp.move(dir);
             if (check_pos_valid(pos_temp))
             {
+
                 crash_mole mole_entry = get_crash_mole_addr(pos_temp)._crash_mole;
-                if (mole_entry != null)
+                string cc;
+                if(mole_entry != null)
                 {
+                    cc = mole_entry.ToString() + "[" + _use_count.ToString() + "]";
+                }
+                else
+                {
+                    cc = "mole_entry [null]" + "[" + _use_count.ToString() + "]";
+                }
+                
+                Debug.Log(cc);
+                if(mole_entry == null)
+                {
+                    continue;
+                }
+                else
+                {
+                    if(mole_entry == mole)
+                    {
+                        continue;
+                    }
                     int length = _move_mole_list.Count;
                     for (int i = 0; i < length; i++)
                     {
-                        if (mole == (crash_mole)_move_mole_list[i])
+                        if (mole == (crash_mole)_move_mole_list[i] && i != 0)
                         {
-
-                            return true;
+                            continue;
                         }
-
                     }
+
                     _move_mole_list.Add(mole_entry);
                     if (move(mole_entry, dir) == false)
                     {
+                        _move_mole_list.Clear();
                         return false;
-                    }
+                    }                    
                     
                 }
                 
             }
             else
             {
+                _move_mole_list.Clear();
                 return false;
             }
             
