@@ -1,6 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
+public enum crash_obj_type
+{
+    normal,
+    player,
+    target
+}
 public enum game_type
 {
     edit,
@@ -65,33 +72,87 @@ public struct crash_pos
 
 }
 
-public class crash_obj
+public class crash_base_obj
 {
-
-    public crash_obj()
+    public crash_base_obj()
     {
         _pos._x = 0;
         _pos._y = 0;
         _pos._z = 0;
         _last_pos = _pos;
+
+
     }
-    public crash_obj(int x, int y, int z)
+    public crash_base_obj(int x, int y, int z)
     {
         _pos._x = x;
         _pos._y = y;
         _pos._z = z;
         _last_pos = _pos;
     }
-
-    public void on_remove()
+    public virtual  void set_position(float x, float y)
     {
-       
+
     }
-   
+
+    public virtual  void set_position(float x, float y, float z)
+    {
+
+    }
+
+    public crash_obj_type get_obj_type()
+    {
+        return _type;
+    }
+
+
     public crash_pos _pos = new crash_pos();
     public crash_pos _last_pos = new crash_pos();
-    public crashmolegrid _grid;
     public crash_mole _crash_mole;
+    protected crash_obj_type _type;
+
+}
+
+public class crash_obj_creature : crash_base_obj
+{
+    public crash_obj_creature()
+        : base()
+    {
+        _type = crash_obj_type.player;
+    }
+    public crash_obj_creature(int x, int y, int z)
+        : base(x, y, z)
+    {
+        _type = crash_obj_type.player;
+    }
+
+}
+public class crash_obj : crash_base_obj
+{
+
+    public crash_obj() : base()
+    {
+        _type = crash_obj_type.normal;
+
+    }
+    public crash_obj(int x, int y, int z) :base(x, y, z)
+    {
+        _type = crash_obj_type.normal;
+    }
+
+
+
+    public override void set_position(float x, float y)
+    {
+        _grid.set_position(x, y);
+    }
+
+    public override void set_position(float x, float y, float z)
+    {
+        _grid.set_position(x, y, z);
+    }
+    public crashmolegrid _grid;
+ 
 
 }
 
@@ -103,9 +164,9 @@ public class crash_mole
 
     }
 
-    public bool add_crash_obj(crash_obj obj_entry)
+    public bool add_crash_obj(crash_base_obj obj_entry)
     {
-        foreach (crash_obj enry in _crash_objs)
+        foreach (crash_base_obj enry in _crash_objs)
         {
             if(obj_entry._pos._x == enry._pos._x &&
                 obj_entry._pos._y == enry._pos._y &&
@@ -143,7 +204,7 @@ public class crash_mole
 
 public class crash_obj_addr
 {
-    public crash_obj _crash_obj = null;
+    public crash_base_obj _crash_obj = null;
 }
 
 public class crash_mole_addr
@@ -164,14 +225,16 @@ public class crash_manager
     bool[, ,] _can_move_locks = new bool[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     public crash_obj_addr[, ,] _crash_objs = new crash_obj_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
     public crash_mole_addr[, ,] _crash_moles = new crash_mole_addr[(int)crash_define.max_x, (int)crash_define.max_z, (int)crash_define.max_y];
-    public ArrayList _crash_moles_list = new ArrayList();
-    public ArrayList _move_mole_list = new ArrayList();
+    public List<crash_mole> _crash_moles_list = new List<crash_mole>();
+    public List<crash_mole> _move_mole_list = new List<crash_mole>();
+    
     public float _grid_distance;
     public float _current_move_distance;
     public float _move_animation_distance;
     public bool _need_play_animation;
     dir_move _last_move_dir;
     GameObject _source_crash_mole_obj;
+    protected ArrayList _Game_objs = new ArrayList();
     public int _use_count = 0;
     public void add_color(int group, Color temp_color)
     {
@@ -183,6 +246,8 @@ public class crash_manager
     }
     public crash_manager()
     {
+        _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
+
         for (int x = 0; x < (int)crash_define.max_x; x ++)
         {
             for(int y = 0; y < (int)crash_define.max_y; y ++)
@@ -194,12 +259,37 @@ public class crash_manager
                 }
             }
         }
-            _grid_distance = (float)1.022;
-        _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
-        _need_play_animation = false;
-        _move_animation_distance = (float)0.05;
+
     }
 
+    public void clear()
+    {
+        for (int x = 0; x < (int)crash_define.max_x; x++)
+        {
+            for (int y = 0; y < (int)crash_define.max_y; y++)
+            {
+                for (int z = 0; z < (int)crash_define.max_z; z++)
+                {
+                    _crash_objs[x, z, y]._crash_obj = null;
+                    _crash_moles[x, z, y]._crash_mole = null;
+                }
+            }
+        }
+
+        _grid_distance = (float)1.022;
+        
+        _need_play_animation = false;
+        _move_animation_distance = (float)0.05;
+        int length = _Game_objs.Count;
+        for(int i = 0; i < length; i ++)
+        {
+            GameObject obj = (GameObject)_Game_objs[i];
+            GameObject.Destroy(obj);            
+        }
+        _crash_moles_list.Clear();
+        _move_mole_list.Clear();
+        _Game_objs.Clear();
+    }
     public void update_move_animation()
     {
         if (_need_play_animation)
@@ -226,11 +316,6 @@ public class crash_manager
                     float x_temp = obj._last_pos._x * _grid_distance;
                     float z_temp = obj._last_pos._z * _grid_distance ;
                     float y_temp = obj._last_pos._y * _grid_distance;
-                    int n = 0;
-                    if (obj._last_pos._y - obj._pos._y >1)
-                    {
-                        n++;
-                    }
                     
                     switch (_last_move_dir)
                     {
@@ -308,12 +393,19 @@ public class crash_manager
                     if (_crash_objs[x, z, y]._crash_obj != null)
                     {
                         GameObject obj_temp = Object.Instantiate<GameObject>(_source_crash_mole_obj);
-                        _crash_objs[x, z, y]._crash_obj._grid = obj_temp.GetComponent<crashmolegrid>();
-                        _crash_objs[x, z, y]._crash_obj._grid.set_color(_group_colors[_crash_objs[x, z, y]._crash_obj._crash_mole._color_group]);
+                        _Game_objs.Add(obj_temp);
+                        crash_base_obj entry = _crash_objs[x, z, y]._crash_obj;
+                        if(entry.get_obj_type() == crash_obj_type.normal)
+                        {
+                            crash_obj crash_obj_temp = (crash_obj)entry;
+                            crash_obj_temp._grid = obj_temp.GetComponent<crashmolegrid>();
+                            crash_obj_temp._grid.set_color(_group_colors[_crash_objs[x, z, y]._crash_obj._crash_mole._color_group]);
+                        }
+
                         float x_temp = x * _grid_distance;
                         float z_temp = z * _grid_distance;
                         float y_temp = y * _grid_distance;
-                        _crash_objs[x, z, y]._crash_obj._grid.set_position(x_temp, y_temp, z_temp);
+                        entry.set_position(x_temp, y_temp, z_temp);
                     }
                     
                 }
@@ -432,22 +524,30 @@ public class crash_manager
             return false;
         }
         _move_mole_list.Clear();
-        ArrayList enry_list = new ArrayList();
+        List<crash_mole> enry_list = new List<crash_mole>();
         int current_count = _crash_moles_list.Count;
         //crash_pos temp_pos = new crash_pos();
         bool can_fall_temp = true;
+        
         for (int i = 0; i < current_count; i++)
         {
+            bool need_continue = false;
             int move_count = enry_list.Count;
-            crash_mole cur_entry = (crash_mole)_crash_moles_list[i];
+            crash_mole cur_entry = _crash_moles_list[i];
             for(int j = 0; j < move_count; j ++)
             {
-                crash_mole temp_entry = (crash_mole)enry_list[j];
+                crash_mole temp_entry = enry_list[j];
                 if(temp_entry == cur_entry)
                 {
-                    continue;
+                    need_continue = true;
+                    break;
                 }            
             }
+            if(need_continue == true)
+            {
+                continue;
+            }
+
             _move_mole_list.Add(cur_entry);
             if (move(cur_entry, dir_move.down) == true)
             {
@@ -480,7 +580,7 @@ public class crash_manager
         return can_fall_temp;
     }
 
-    public void update_move_list(ArrayList temp_list, dir_move dir)
+    public void update_move_list(List<crash_mole> temp_list, dir_move dir)
     {
         int count_temp = temp_list.Count;
         for (int i = 0; i < count_temp; i ++ )

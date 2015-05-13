@@ -13,6 +13,7 @@ public class crash_mole_grid_manager : MonoBehaviour {
         {
             case game_type.edit:
                 {
+                    global_instance.Instance._crash_manager.clear();
                     create_edit_crash_mole_grid();
 
                 }
