@@ -12,20 +12,73 @@ public class creature {
     Dictionary<creature_type, GameObject> _moles = new Dictionary<creature_type, GameObject>();
     public creature()
     {
-        GameObject obj_1 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("prefab/character/model/zippermouth_a_PF"));
+        GameObject obj_1 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("character/model/zippermouth_a_PF"));
         _moles.Add(creature_type.creature_1, obj_1);
 
-        GameObject obj_2 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("prefab/character/model/zippermouth_b_PF"));
-        _moles.Add(creature_type.creature_1, obj_2);
+        GameObject obj_2 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("character/model/zippermouth_b_PF"));
+        _moles.Add(creature_type.creature_2, obj_2);
 
-        GameObject obj_3 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("prefab/character/model/zippermouth_c_PF"));
-        _moles.Add(creature_type.creature_1, obj_3);
+        GameObject obj_3 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("character/model/zippermouth_c_PF"));
+        _moles.Add(creature_type.creature_3, obj_3);
 
+    }
+
+    public void Destroy()
+    {
+        foreach (var entry in _moles)
+        {
+            GameObject obj_entry = entry.Value;
+            GameObject.Destroy(obj_entry);
+        }
     }
 
     public void set_position(float x, float y, float z)
     {
+        _current_position.x = x;
+        _current_position.y = y;
+        _current_position.z = z;
+        
+        foreach (var entry in _moles)
+        {
+            GameObject obj_entry = entry.Value;
+            obj_entry.transform.position = _current_position;
+        }
+    }
 
+    public void set_dir(dir_move dir)
+    {
+        _dir = dir;
+        float y_r = 0.0f;
+        switch(dir)
+        {
+            case dir_move.back:
+                {
+                    y_r = 340;
+                }
+                break;
+            case dir_move.front:
+                {
+                    y_r = 160;
+                }
+                break;
+            case dir_move.right:
+                {
+                    y_r = 70;
+                }
+                break;
+            case dir_move.left:
+                {
+                    y_r = 250;
+                }
+                break;
+        }
+
+        foreach (var entry in _moles)
+        {
+            GameObject obj_entry = entry.Value;
+            obj_entry.transform.rotation.SetEulerRotation(obj_entry.transform.rotation.x, y_r, obj_entry.transform.rotation.z);
+
+        }
     }
 
     public void set_creature_type(creature_type type)
@@ -81,5 +134,7 @@ public class creature {
 
 
     protected creature_type _cureent_type;
+    protected Vector3 _current_position = new Vector3();
+    protected dir_move _dir;
 
 }

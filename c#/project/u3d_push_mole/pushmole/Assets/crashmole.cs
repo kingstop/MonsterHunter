@@ -236,6 +236,8 @@ public class crash_manager
     GameObject _source_crash_mole_obj;
     protected ArrayList _Game_objs = new ArrayList();
     public int _use_count = 0;
+
+    public creature _creature = null;
     public void add_color(int group, Color temp_color)
     {
         if (_group_colors.ContainsKey(group) == false)
@@ -244,6 +246,24 @@ public class crash_manager
         }
         
     }
+
+    public void dir_button_down(dir_move dir)
+    {
+        Debug.Log("move down [" + dir.ToString() + "]");
+    }
+
+    public int transform_to_map(float temp_number)
+    {
+        int grid = (int)(temp_number / _grid_distance);
+        return grid;
+    }
+
+    public float transform_to_position(int number)
+    {
+        float position = _grid_distance * ((float)number + 0.5f);
+        return position;
+    }
+
     public crash_manager()
     {
         _source_crash_mole_obj = Resources.Load<GameObject>("prefab/mole_object");
@@ -259,7 +279,7 @@ public class crash_manager
                 }
             }
         }
-
+        _grid_distance = (float)1.022;
     }
 
     public void clear()
@@ -289,6 +309,11 @@ public class crash_manager
         _crash_moles_list.Clear();
         _move_mole_list.Clear();
         _Game_objs.Clear();
+        if(_creature != null)
+        {
+            _creature.Destroy();
+            _creature = null;
+        }
     }
     public void update_move_animation()
     {
@@ -411,6 +436,15 @@ public class crash_manager
                 }
             }
         }
+        if(_creature == null)
+        {
+            _creature = new creature();
+            _creature.set_creature_type(creature_type.creature_2);
+            float position_x = transform_to_position(1);
+            float position_y = transform_to_position(1);
+            float position_z = transform_to_position(1);
+            _creature.set_position(position_x, position_y, position_z);            
+        }
     }
 
     public crash_obj create_crash_obj(int x, int y)
@@ -464,58 +498,58 @@ public class crash_manager
     {
         _can_move_locks[x, z, y] = true;
     }
-    public bool move(int x, int y, int z, dir_move dir)
-    {
+    //public bool move(int x, int y, int z, dir_move dir)
+    //{
 
-        clear_block();
-        _move_mole_list.Clear();
+    //    clear_block();
+    //    _move_mole_list.Clear();
 
-        crash_mole entry = get_crash_mole_addr(x, z, y)._crash_mole;
-        if (entry == null)
-        {
-            return false;
-        }
-        _move_mole_list.Add(entry);
-        bool b_temp = move(entry, dir);
-        if (b_temp)
-        {
-            _last_move_dir = dir;
-            int temp_count = _move_mole_list.Count;
-            for (int j = 0; j < temp_count; j++)
-            {
-                crash_mole mole = (crash_mole)_crash_moles_list[j];
-                int crash_obj_count = mole._crash_objs.Count;
-                for (int i = 0; i < crash_obj_count; i++)
-                {
-                    crash_obj obj = (crash_obj)mole._crash_objs[i];
-                    set_block(obj._pos._x, obj._pos._z, obj._pos._y);
-                    //obj._last_pos = obj._pos;
-                    //obj._pos.move(dir);
+    //    crash_mole entry = get_crash_mole_addr(x, z, y)._crash_mole;
+    //    if (entry == null)
+    //    {
+    //        return false;
+    //    }
+    //    _move_mole_list.Add(entry);
+    //    bool b_temp = move(entry, dir);
+    //    if (b_temp)
+    //    {
+    //        _last_move_dir = dir;
+    //        int temp_count = _move_mole_list.Count;
+    //        for (int j = 0; j < temp_count; j++)
+    //        {
+    //            crash_mole mole = (crash_mole)_crash_moles_list[j];
+    //            int crash_obj_count = mole._crash_objs.Count;
+    //            for (int i = 0; i < crash_obj_count; i++)
+    //            {
+    //                crash_obj obj = (crash_obj)mole._crash_objs[i];
+    //                set_block(obj._pos._x, obj._pos._z, obj._pos._y);
+    //                //obj._last_pos = obj._pos;
+    //                //obj._pos.move(dir);
 
-                }
+    //            }
 
                 
 
-            }
+    //        }
 
-            if (dir != dir_move.down && dir != dir_move.up)
-            {
+    //        if (dir != dir_move.down && dir != dir_move.up)
+    //        {
 
-            }
-            else
-            {
+    //        }
+    //        else
+    //        {
 
-            }
-        }
-        else
-        {
+    //        }
+    //    }
+    //    else
+    //    {
             
-            _move_mole_list.Clear();
-        }
+    //        _move_mole_list.Clear();
+    //    }
 
-        return b_temp;
+    //    return b_temp;
 
-    }
+    //}
 
     public bool need_fall_update()
     {
@@ -626,19 +660,7 @@ public class crash_manager
             pos_temp.move(dir);
             if (check_pos_valid(pos_temp))
             {
-
                 crash_mole mole_entry = get_crash_mole_addr(pos_temp)._crash_mole;
-                string cc;
-                if(mole_entry != null)
-                {
-                    cc = mole_entry.ToString() + "[" + _use_count.ToString() + "]";
-                }
-                else
-                {
-                    cc = "mole_entry [null]" + "[" + _use_count.ToString() + "]";
-                }
-                
-                Debug.Log(cc);
                 if(mole_entry == null)
                 {
                     continue;

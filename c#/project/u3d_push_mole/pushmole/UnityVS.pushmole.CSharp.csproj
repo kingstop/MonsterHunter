@@ -62,6 +62,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\button_event_handler.cs" />
     <Compile Include="Assets\color_button_click.cs" />
     <Compile Include="Assets\crash_mole_grid_manager.cs" />
     <Compile Include="Assets\crashmole.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Assets\creature.cs" />
     <Compile Include="Assets\dpt_zippermouth\demo_scene\GUITest.cs" />
     <Compile Include="Assets\dpt_zippermouth\demo_scene\ObjectRotation.cs" />
+    <Compile Include="Assets\game_btn_down.cs" />
     <Compile Include="Assets\game_type_click.cs" />
     <Compile Include="Assets\global_instance.cs" />
     <Compile Include="Assets\next_step_click.cs" />

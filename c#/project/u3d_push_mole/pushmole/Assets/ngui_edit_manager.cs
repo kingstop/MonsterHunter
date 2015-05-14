@@ -9,6 +9,26 @@ public class ngui_edit_manager : MonoBehaviour {
     public Button[] _Buttons_simple_game_type;
     public Color _current_color;
 
+    public Button[] _game_btns;
+    public Button[] _dir_btn;
+    
+
+    void hide_game_btns()
+    {
+        foreach(Button entry in _game_btns)
+        {
+            entry.gameObject.SetActive(false);
+        }
+    }
+
+    void show_game_btns()
+    {
+        foreach (Button entry in _game_btns)
+        {
+            entry.gameObject.SetActive(true);
+        }
+
+    }
 	// Use this for initialization
 	void Start () {
         //Debug.Log("ngui_edit_manager start[" + _Buttons_simple.Length.ToString()  + ")
@@ -35,8 +55,43 @@ public class ngui_edit_manager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        switch(global_instance.Instance._crash_mole_grid_manager.get_game_type())
+        {
+            case game_type.edit:
+                {
+
+                }
+                break;
+            case game_type.game:
+                {
+                    dir_move dir = dir_move.up;
+                    if(Input.GetButtonDown("Button_left"))
+                    {
+                        dir = dir_move.left;
+                    }
+                    else if(Input.GetButtonDown("Button_right"))
+                    {
+                        dir = dir_move.right;
+                    }
+                    else if(Input.GetButtonDown("Button_back"))
+                    {
+                        dir = dir_move.back;
+                    }
+                    else if(Input.GetButtonDown("Button_front"))
+                    {
+                        dir = dir_move.front;
+                    }
+                    if(dir != dir_move.up)
+                    {
+                        global_instance.Instance._crash_manager.dir_button_down(dir);
+                    }
+                    
+                }
+                break;
+        }
 	
 	}
+
 
     public void update_game_type(game_type type)
     {
@@ -53,6 +108,13 @@ public class ngui_edit_manager : MonoBehaviour {
         if (global_instance.Instance._crash_mole_grid_manager != null)
         {
             global_instance.Instance._crash_mole_grid_manager.update_game_type(type);
+        }
+        if(type == game_type.game)
+        {
+            show_game_btns();
+        }else
+        {
+            hide_game_btns();
         }
 
         

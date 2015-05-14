@@ -6,10 +6,16 @@ public class crash_mole_grid_manager : MonoBehaviour {
     GameObject _source_crash_mole_obj;
     crashmolegrid[,] _crashmolegrids = new crashmolegrid[18, 60];
     ArrayList _objlist = new ArrayList();
+    protected game_type _current_type;
     //prush_mo
+    public game_type get_game_type()
+    {
+        return _current_type;
+    }
     public void update_game_type(game_type type)
     {
-        switch (type)
+        _current_type = type;
+        switch (_current_type)
         {
             case game_type.edit:
                 {
