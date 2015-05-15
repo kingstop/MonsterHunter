@@ -24,7 +24,7 @@ public enum dir_move
     front,
     down,
     up,
-
+    no
 }
 
 public struct crash_pos
@@ -125,6 +125,7 @@ public class crash_obj_creature : crash_base_obj
     {
         _type = crash_obj_type.player;
     }
+
 
 }
 public class crash_obj : crash_base_obj
@@ -236,6 +237,8 @@ public class crash_manager
     GameObject _source_crash_mole_obj;
     protected ArrayList _Game_objs = new ArrayList();
     public int _use_count = 0;
+    dir_move _creature_move_dir = dir_move.no;
+    float _creature_move_speed;
 
     public creature _creature = null;
     public void add_color(int group, Color temp_color)
@@ -247,10 +250,61 @@ public class crash_manager
         
     }
 
-    public void dir_button_down(dir_move dir)
+    public void update()
     {
-        Debug.Log("move down [" + dir.ToString() + "]");
+        if (_creature != null)
+        {
+            if (_creature_move_dir != dir_move.no)
+            {
+                Vector3 position_creature = _creature.get_position();
+                switch (_creature_move_dir)
+                {
+                    case dir_move.left:
+                        {
+                            position_creature.x -= _creature_move_speed;
+                        }
+                        break;
+                    case dir_move.right:
+                        {
+                            position_creature.x += _creature_move_speed;
+                        }
+                        break;
+                    case dir_move.back:
+                        {
+                            position_creature.z += _creature_move_speed;
+                        }
+                        break;
+                    case dir_move.front:
+                        {
+                            position_creature.z -= _creature_move_speed;
+                        }
+                        break;
+                }
+                crash_pos pos = new crash_pos();
+
+                pos._y = transform_to_map(position_creature.y);
+                pos._x = transform_to_map(position_creature.x);
+                pos._z = transform_to_map(position_creature.z);
+                if(check_pos_valid(pos))
+                {
+                    if(get_crash_obj_addr(pos)._crash_obj == null)
+                    {
+                        _creature.set_position(position_creature.x, position_creature.y, position_creature.z);
+                        _creature.set_dir(_creature_move_dir);
+                    }
+                    else
+                    {
+                        Debug.Log("Block pos [" + pos._x.ToString() + "," + pos._y.ToString() + "," + pos._z.ToString() + "]");
+                    }
+
+                    
+                }
+                
+            }
+        }
+
     }
+
 
     public int transform_to_map(float temp_number)
     {
@@ -280,6 +334,7 @@ public class crash_manager
             }
         }
         _grid_distance = (float)1.022;
+        _creature_move_speed = 0.1f;
     }
 
     public void clear()
@@ -440,9 +495,9 @@ public class crash_manager
         {
             _creature = new creature();
             _creature.set_creature_type(creature_type.creature_2);
-            float position_x = transform_to_position(1);
-            float position_y = transform_to_position(1);
-            float position_z = transform_to_position(1);
+            float position_x = transform_to_position(9);
+            float position_y = transform_to_position(0);
+            float position_z = transform_to_position(0);
             _creature.set_position(position_x, position_y, position_z);            
         }
     }
@@ -494,62 +549,16 @@ public class crash_manager
         }
     }
 
+    public void move_creaure(dir_move dir)
+    {
+        _creature_move_dir = dir;
+
+    }
+
     public void set_block(int x, int z, int y)
     {
         _can_move_locks[x, z, y] = true;
     }
-    //public bool move(int x, int y, int z, dir_move dir)
-    //{
-
-    //    clear_block();
-    //    _move_mole_list.Clear();
-
-    //    crash_mole entry = get_crash_mole_addr(x, z, y)._crash_mole;
-    //    if (entry == null)
-    //    {
-    //        return false;
-    //    }
-    //    _move_mole_list.Add(entry);
-    //    bool b_temp = move(entry, dir);
-    //    if (b_temp)
-    //    {
-    //        _last_move_dir = dir;
-    //        int temp_count = _move_mole_list.Count;
-    //        for (int j = 0; j < temp_count; j++)
-    //        {
-    //            crash_mole mole = (crash_mole)_crash_moles_list[j];
-    //            int crash_obj_count = mole._crash_objs.Count;
-    //            for (int i = 0; i < crash_obj_count; i++)
-    //            {
-    //                crash_obj obj = (crash_obj)mole._crash_objs[i];
-    //                set_block(obj._pos._x, obj._pos._z, obj._pos._y);
-    //                //obj._last_pos = obj._pos;
-    //                //obj._pos.move(dir);
-
-    //            }
-
-                
-
-    //        }
-
-    //        if (dir != dir_move.down && dir != dir_move.up)
-    //        {
-
-    //        }
-    //        else
-    //        {
-
-    //        }
-    //    }
-    //    else
-    //    {
-            
-    //        _move_mole_list.Clear();
-    //    }
-
-    //    return b_temp;
-
-    //}
 
     public bool need_fall_update()
     {

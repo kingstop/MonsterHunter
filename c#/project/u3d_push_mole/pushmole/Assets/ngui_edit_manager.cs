@@ -11,13 +11,20 @@ public class ngui_edit_manager : MonoBehaviour {
 
     public Button[] _game_btns;
     public Button[] _dir_btn;
-    
+
+    public bool[] _dir_btn_down = new bool[4];
 
     void hide_game_btns()
     {
         foreach(Button entry in _game_btns)
         {
             entry.gameObject.SetActive(false);
+        }
+
+        int length = _dir_btn_down.Length;
+        for (int i = 0; i < length; i++)
+        {
+            _dir_btn_down[i] = false;
         }
     }
 
@@ -28,6 +35,46 @@ public class ngui_edit_manager : MonoBehaviour {
             entry.gameObject.SetActive(true);
         }
 
+        int length = _dir_btn_down.Length;
+        for(int i = 0; i < length; i ++)
+        {
+            _dir_btn_down[i] = false;
+        }
+
+    }
+
+    public void btn_down(Button entry)
+    {
+        int length = _dir_btn.Length;
+        for(int i = 0; i < length; i ++)
+        {
+            if(_dir_btn[i] == entry)
+            {
+                _dir_btn_down[i] = true;                
+            }
+            else
+            {
+                _dir_btn_down[i] = false;                
+            }
+            
+        }
+    }
+
+    public void btn_up(Button entry)
+    {
+        int length = _dir_btn.Length;
+        for (int i = 0; i < length; i++)
+        {
+            if (_dir_btn[i] == entry)
+            {
+                _dir_btn_down[i] = false;
+            }
+        }
+    }
+
+    void Awake()
+    {
+        global_instance.Instance._ngui_edit_manager = this;
     }
 	// Use this for initialization
 	void Start () {
@@ -64,27 +111,42 @@ public class ngui_edit_manager : MonoBehaviour {
                 break;
             case game_type.game:
                 {
-                    dir_move dir = dir_move.up;
-                    if(Input.GetButtonDown("Button_left"))
+                    dir_move dir = dir_move.no;
+                    int length = _dir_btn_down.Length;
+                    for(int i = 0; i < length; i ++)
                     {
-                        dir = dir_move.left;
+                        if(_dir_btn_down[i] == true)
+                        {
+                            dir = (dir_move)i;
+                            break;
+                        }
                     }
-                    else if(Input.GetButtonDown("Button_right"))
-                    {
-                        dir = dir_move.right;
-                    }
-                    else if(Input.GetButtonDown("Button_back"))
-                    {
-                        dir = dir_move.back;
-                    }
-                    else if(Input.GetButtonDown("Button_front"))
-                    {
-                        dir = dir_move.front;
-                    }
-                    if(dir != dir_move.up)
-                    {
-                        global_instance.Instance._crash_manager.dir_button_down(dir);
-                    }
+            
+                    global_instance.Instance._crash_manager.move_creaure(dir);
+                    global_instance.Instance._crash_manager.update();
+                    
+                    
+                    //dir_move dir = dir_move.up;
+                    //if(Input.GetButtonDown("Button_left"))
+                    //{
+                    //    dir = dir_move.left;
+                    //}
+                    //else if(Input.GetButtonDown("Button_right"))
+                    //{
+                    //    dir = dir_move.right;
+                    //}
+                    //else if(Input.GetButtonDown("Button_back"))
+                    //{
+                    //    dir = dir_move.back;
+                    //}
+                    //else if(Input.GetButtonDown("Button_front"))
+                    //{
+                    //    dir = dir_move.front;
+                    //}
+                    //if(dir != dir_move.up)
+                    //{
+                    //    global_instance.Instance._crash_manager.dir_button_down(dir);
+                    //}
                     
                 }
                 break;

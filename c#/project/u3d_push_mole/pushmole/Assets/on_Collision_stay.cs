@@ -2,29 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public enum creature_type
+public class on_Collision_stay : MonoBehaviour
 {
-    creature_1,
-    creature_2,
-    creature_3
-}
-
-public enum creature_state
-{
-    idle,
-    run,
-    wound,
-    special
-}
-public class creature {
     Dictionary<creature_type, GameObject> _moles = new Dictionary<creature_type, GameObject>();
     List<GameObject> _moles_list = new List<GameObject>();
-    GameObject _creature_physics = null;
+    //GameObject _creature_physics = null;
     Rigidbody _Rigidbody = null;
-
-    public creature()
+    void Awake()
     {
-        _creature_physics = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("prefab/creature_physics"));
+       // _creature_physics = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("prefab/creature_physics"));
         GameObject obj_1 = GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("character/model/zippermouth_a_PF"));
         _moles.Add(creature_type.creature_1, obj_1);
 
@@ -35,11 +21,12 @@ public class creature {
         _moles.Add(creature_type.creature_3, obj_3);
         _state = creature_state.idle;
         play_idle();
+       
         set_dir(dir_move.front);
         _moles_list.Add(obj_1);
         _moles_list.Add(obj_2);
         _moles_list.Add(obj_3);
-        _Rigidbody = _creature_physics.GetComponent<Rigidbody>();
+        _Rigidbody = this.GetComponent<Rigidbody>();
 
     }
 
@@ -52,19 +39,7 @@ public class creature {
         }
     }
 
-    public void set_position(float x, float y, float z)
-    {
-        _current_position.x = x;
-        _current_position.y = y - 0.7f;
-        _current_position.z = z;
-        
-        foreach (var entry in _moles)
-        {
-            GameObject obj_entry = entry.Value;
-            obj_entry.transform.position = _current_position;
-        }
-        _creature_physics.transform.position = _current_position;
-    }
+
 
     public Vector3 get_position()
     {
@@ -105,6 +80,8 @@ public class creature {
         }
 
     }
+
+    
     public void set_dir(dir_move dir)
     {
         if(_dir != dir)
@@ -134,19 +111,20 @@ public class creature {
                     break;
             }
 
+            Vector3 vc = new Vector3();
+            vc = transform.rotation.ToEulerAngles();
+            vc.y = y_r;
+            Quaternion a_temp = transform.rotation;
+            a_temp.SetEulerAngles(vc);
             int length = _moles_list.Count;
             for (int i = 0; i < length; i ++ )
-            {
-                Vector3 vc = new Vector3();
-                vc = _moles_list[i].transform.rotation.ToEulerAngles();
-                vc.y = y_r;
-                Quaternion a_temp = _moles_list[i].transform.rotation;
-                a_temp.SetEulerAngles(vc);
+            {                                                              
                 _moles_list[i].transform.rotation = a_temp;
                 
             }
-           
+            transform.rotation = a_temp;
 
+            _Rigidbody.velocity = transform.TransformDirection(Vector3.forward * 10);
         }
         _dir = dir;
 
@@ -211,4 +189,22 @@ public class creature {
     protected dir_move _dir;
     protected creature_state _state;
 
+	// Use this for initialization
+	void Start () {
+	
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        foreach (var entry in _moles)
+        {
+            GameObject obj_entry = entry.Value;
+            obj_entry.transform.position = this.transform.position;
+        }
+	}
+
+    void OnTriggerStay( Collider other )
+    {
+        Debug.Log("OnTriggerStay ["+ other.ToString() + "]");
+    }
 }

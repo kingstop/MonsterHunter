@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 //需要EventTrigger脚本的支援
 [RequireComponent(typeof(UnityEngine.EventSystems.EventTrigger))]
-public class EventHandler : MonoBehaviour
+public class button_event_handler : MonoBehaviour
 {
 
     // Use this for initialization
@@ -29,13 +29,35 @@ public class EventHandler : MonoBehaviour
 
     private void Onclick(BaseEventData pointData)
     {
-        Debug.Log("Button Clicked");
+        //Debug.Log("Button Clicked");
 
     }
 
     private void OnButtonDown(BaseEventData pointData)
     {
 
+    }
+
+    public void OnButtonDown(Button entry)
+    {
+        global_instance.Instance._ngui_edit_manager.btn_down(entry);
+
+    }
+
+    public void OnButtonUp(Button entry)
+    {
+        global_instance.Instance._ngui_edit_manager.btn_up(entry);
+    }
+
+
+    public void OnLeftButtonExit()
+    {
+      //  Debug.Log("LeftButtonExit");
+    }
+
+    public void OnLeftButtonEnter()
+    {
+        //Debug.Log("LeftButtonEnter");
     }
 
 }
